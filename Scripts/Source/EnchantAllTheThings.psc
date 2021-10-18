@@ -1,11 +1,5 @@
 scriptName EnchantAllTheThings extends Quest
 
-; Before we ship this...
-;
-; Include a Fus Ro Dah-like effect on a sword...
-;
-; Make a single Magic Effect available for PushAway
-
 Actor property PlayerRef auto
 
 Message property EnchantThings_Menu_Main auto
@@ -17,14 +11,19 @@ Message property EnchantThings_Menu_ViewEnchanementMagicEffect auto
 
 Form property EnchantThings_MessageText_BaseForm auto
 
-float property CurrentlyInstalledVersion auto
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Versioning
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-string property RecurringNotificationMessage auto
-float property RecurringNotificationMessageInterval auto
+float property CurrentlyInstalledVersion auto
 
 float function GetCurrentVersion() global
     return 1.0
 endFunction
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Mod Installation
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; Mod Installation
 event OnInit()
@@ -33,6 +32,13 @@ event OnInit()
     PlayerRef.EquipSpell(theSpell, 0)
     PlayerRef.EquipSpell(theSpell, 1)
 endEvent
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+string property RecurringNotificationMessage auto
+float property RecurringNotificationMessageInterval auto
 
 event OnUpdate()
     if RecurringNotificationMessage
@@ -51,6 +57,10 @@ function StopRecurringNotificationMessage()
     RecurringNotificationMessage = ""
 endFunction
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 function MainMenu()
     SetMessageBoxText()
     int enchantItem = 0
@@ -63,15 +73,27 @@ function MainMenu()
     endIf
 endFunction
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 function ManageEnchantments()
     SetMessageBoxText()
     int newEnchantment = 0
-    int mainMenu = 1
+    int viewEnchantment = 1
+    int mainMenu = 2
     int result = EnchantThings_Menu_ManageEnchantments.Show()
     if result == newEnchantment
         NewEnchantment()
+    elseIf result == viewEnchantment
+        int theEnchantment = ChooseEnchantment()
+        if theEnchantment
+            ViewEnchantment(theEnchantment)
+        else
+            ManageEnchantments()
+        endIf
     elseIf result == mainMenu
-        mainMenu()
+        MainMenu()
     endIf
 endFunction
 
@@ -178,14 +200,6 @@ function ViewEnchantment_AddMagicEffect(int theEnchantment)
     ViewEnchantment(theEnchantment)
 endFunction
 
-function SetMessageBoxText(string text = "")
-    if text
-        EnchantThings_MessageText_BaseForm.SetName("~ Enchant All The Things ~\n\n" + text)
-    else
-        EnchantThings_MessageText_BaseForm.SetName("~ Enchant All The Things ~")
-    endIf
-endFunction
-
 ; TODO put the enchantment display text here!
 function EnchantItem(int theEnchantment)
     Form weaponOrArmor = ChooseItem( \
@@ -235,6 +249,21 @@ function EnchantItem(int theEnchantment)
     Debug.MessageBox("Enchanted " + weaponOrArmor.GetName() + " with " + EnchantAllTheThings_Enchantment.GetName(theEnchantment))
 endFunction
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+int function ChooseEnchantment()
+    string[] enchantmentNames = EnchantAllTheThings_Enchantment.GetEnchantmentNames()
+    string selectedEnchantmentName = GetUserSelection(enchantmentNames)
+    int theEnchantment = EnchantAllTheThings_Enchantment.GetEnchantmentByName(selectedEnchantmentName)
+    return theEnchantment
+endFunction
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 Form function ChooseItem(string enchantmentType = "", int theEnchantment = 0)
     if ! enchantmentType
         enchantmentType = ChooseEnchantmentType()
@@ -262,6 +291,10 @@ Form function ChooseItem(string enchantmentType = "", int theEnchantment = 0)
         endIf
     endIf
 endFunction
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 Form function SearchAll(string enchantmentType, bool showItemsWithEnchantments = false)
     string query = GetUserInput()
@@ -348,6 +381,14 @@ string function SearchCategoryForEnchantmentType(string enchantmentType)
         return "WEAP"
     elseIf enchantmentType == "ARMOR"
         return "ARMO"
+    endIf
+endFunction
+
+function SetMessageBoxText(string text = "")
+    if text
+        EnchantThings_MessageText_BaseForm.SetName("~ Enchant All The Things ~\n\n" + text)
+    else
+        EnchantThings_MessageText_BaseForm.SetName("~ Enchant All The Things ~")
     endIf
 endFunction
 

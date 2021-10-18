@@ -75,6 +75,35 @@ float function GetMagicEffectMaxCharge(int theEnchantment) global
     return 10000
 endFunction
 
+string[] function GetEnchantmentNames() global
+    int enchantmentNames = JArray.object()
+    int enchantmentsArray = _getEnchantmentsArray()
+    int count = JArray.count(enchantmentsArray)
+    int i = 0
+    while i < count
+        int theEnchantment = JArray.getObj(enchantmentsArray, i)
+        string name = GetName(theEnchantment)
+        JArray.addStr(enchantmentNames, name)
+        i += 1
+    endWhile
+    return JArray.asStringArray(enchantmentNames)
+endFunction
+
+int function GetEnchantmentByName(string name) global
+    int enchantmentNames = JArray.object()
+    int enchantmentsArray = _getEnchantmentsArray()
+    int count = JArray.count(enchantmentsArray)
+    int i = 0
+    while i < count
+        int theEnchantment = JArray.getObj(enchantmentsArray, i)
+        string enchantmentName = GetName(theEnchantment)
+        if name == enchantmentName
+            return theEnchantment
+        endIf
+        i += 1
+    endWhile
+endFunction
+
 int function _getMagicEffectsArray(int theEnchantment) global
     return JMap.getObj(theEnchantment, "magicEffects")
 endFunction
