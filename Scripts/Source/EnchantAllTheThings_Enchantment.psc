@@ -41,8 +41,38 @@ bool function HasAnyMagicEffects(int theEnchantment) global
     return JArray.count(_getMagicEffectsArray(theEnchantment)) > 0
 endFunction
 
-Form[] function GetMagicEffects(int theEnchantment) global
-    return JArray.asFormArray(_getMagicEffectsArray(theEnchantment))
+MagicEffect[] function GetMagicEffects(int theEnchantment) global
+    MagicEffect[] theEffects
+    Form[] theEffectForms = JArray.asFormArray(_getMagicEffectsArray(theEnchantment))
+    if theEffectForms.Length == 1
+        theEffects = new MagicEffect[1]
+        theEffects[0] = theEffectForms[0] as MagicEffect
+    else
+        Debug.MessageBox("We only currently support 1 magic effect")
+    endIf
+    return theEffects
+endFunction
+
+float[] function GetMagicEffectMagnitudes(int theEnchantment) global
+    float[] magnitudes = new float[1]
+    magnitudes[0] = 6969
+    return magnitudes
+endFunction
+
+int[] function GetMagicEffectAreaOfEffects(int theEnchantment) global
+    int[] areaOfEffects = new int[1]
+    areaOfEffects[0] = 100
+    return areaOfEffects
+endFunction
+
+int[] function GetMagicEffectDurations(int theEnchantment) global
+    int[] durations = new int[1]
+    durations[0] = 100
+    return durations
+endFunction
+
+float function GetMagicEffectMaxCharge(int theEnchantment) global
+    return 10000
 endFunction
 
 int function _getMagicEffectsArray(int theEnchantment) global
