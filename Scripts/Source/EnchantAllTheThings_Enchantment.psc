@@ -3,7 +3,7 @@ scriptName EnchantAllTheThings_Enchantment
 
 int function Create(string enchantmentType) global
     int newEnchantment = JMap.object()
-    JArray.addObj(GetEnchantmentsArray(), newEnchantment)
+    JArray.addObj(_getEnchantmentsArray(), newEnchantment)
     JMap.setStr(newEnchantment, "type", enchantmentType)
     JMap.setObj(newEnchantment, "magicEffects", JArray.object())
     return newEnchantment
@@ -34,18 +34,22 @@ bool function IsWeaponType(int theEnchantment) global
 endFunction
 
 function AddMagicEffect(int theEnchantment, MagicEffect theEffect) global
-    JArray.addForm(GetMagicEffectsArray(theEnchantment), theEffect)
+    JArray.addForm(_getMagicEffectsArray(theEnchantment), theEffect)
 endFunction
 
 bool function HasAnyMagicEffects(int theEnchantment) global
-    return JArray.count(GetMagicEffectsArray(theEnchantment)) > 0
+    return JArray.count(_getMagicEffectsArray(theEnchantment)) > 0
 endFunction
 
-int function GetMagicEffectsArray(int theEnchantment) global
+Form[] function GetMagicEffects(int theEnchantment) global
+    return JArray.asFormArray(_getMagicEffectsArray(theEnchantment))
+endFunction
+
+int function _getMagicEffectsArray(int theEnchantment) global
     return JMap.getObj(theEnchantment, "magicEffects")
 endFunction
 
-int function GetEnchantmentsArray() global
+int function _getEnchantmentsArray() global
     int theArray = JDB.solveObj(".enchantAllTheThings.enchantments")
     if ! theArray
         theArray = JArray.object()

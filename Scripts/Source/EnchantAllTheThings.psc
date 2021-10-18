@@ -1,9 +1,10 @@
 scriptName EnchantAllTheThings extends Quest
 
+Message property EnchantThings_Menu_Main auto
 Message property EnchantThings_Menu_ViewEnchantment auto
 Message property EnchantThings_Menu_ManageEnchantments auto
 Message property EnchantThings_Menu_ChooseEnchantmentType auto
-Message property EnchantThings_Menu_Main auto
+Message property EnchantThings_Menu_ChooseItem auto
 
 Form property EnchantThings_MessageText_BaseForm auto
 
@@ -56,20 +57,38 @@ function NewEnchantment()
     endIf
 endFunction
 
+string function ChooseEnchantmentType()
+    int armorType = 0
+    int weaponType = 1
+    int result = EnchantThings_Menu_ChooseEnchantmentType.Show()
+    if result == armorType
+        return "ARMOR"
+    elseIf result == weaponType
+        return "WEAPON"
+    endIf
+endFunction
+
 function ViewEnchantment(int theEnchantment)
     string text = "Enchantment Type: " + EnchantAllTheThings_Enchantment.GetType(theEnchantment) + \
         "\nEnchantment Name: " + EnchantAllTheThings_Enchantment.GetName(theEnchantment)
 
     if EnchantAllTheThings_Enchantment.HasAnyMagicEffects(theEnchantment)
         text += "\nMagic Effects:\n"
-        
+        Form[] theEffects = EnchantAllTheThings_Enchantment.GetMagicEffects(theEnchantment)
+        int i = 0
+        while i < theEffects.Length
+            text += "- " + theEffects[i].GetName() + "\n"
+            i += 1
+        endWhile
     endIf
+    SetMessageBoxText(text)
 
     int setName = 0
     int addMagicEffect = 1
     int modifyMagicEffect = 2
     int deleteMagicEffect = 3
-    int mainMenu = 4
+    int enchantItem = 4
+    int mainMenu = 5
     int result = EnchantThings_Menu_ViewEnchantment.Show()
     if result == setName
         string name = GetUserInput()
@@ -78,9 +97,11 @@ function ViewEnchantment(int theEnchantment)
     elseIf result == addMagicEffect
         ViewEnchantment_AddMagicEffect(theEnchantment)
     elseIf result == modifyMagicEffect
-        ; ModifyMagicEffect(theEnchantment)
+        ; ; ; ModifyMagicEffect(theEnchantment)
     elseIf result == deleteMagicEffect
-        ; DeleteMagicEffect(theEnchantment)
+        ; ; ; DeleteMagicEffect(theEnchantment)
+    elseIf result == enchantItem
+        EnchantItem(theEnchantment)
     elseIf result == mainMenu
         MainMenu()
     endIf
@@ -128,7 +149,7 @@ function ViewEnchantment_AddMagicEffect(int theEnchantment)
     MagicEffect theEffect = FormHelper.HexToForm(formId) as MagicEffect
     EnchantAllTheThings_Enchantment.AddMagicEffect(theEnchantment, theEffect)
 
-    Debug.MessageBox("Added " + theEffect + " to " + EnchantAllTheThings_Enchantment.GetName(theEnchantment))
+    Debug.MessageBox("Added " + theEffect.GetName() + " to " + EnchantAllTheThings_Enchantment.GetName(theEnchantment))
 
     JValue.release(effectDisplayNames)
     JValue.release(searchResults)
@@ -142,6 +163,56 @@ function SetMessageBoxText(string text = "")
     else
         EnchantThings_MessageText_BaseForm.SetName("~ Enchant All The Things ~")
     endIf
+endFunction
+
+function EnchantItem(int theEnchantment)
+    Form weaponOrArmor = ChooseItem( \
+        theEnchantment = theEnchantment, \
+        enchantmentType = EnchantAllTheThings_Enchantment.GetType(theEnchantment))
+
+    Debug.MessageBox("The item to enchant is: " + weaponOrArmor)
+    ; ....
+endFunction
+
+Form function ChooseItem(string enchantmentType = "", int theEnchantment = 0)
+    if ! enchantmentType
+        enchantmentType = ChooseEnchantmentType()
+    endIf
+    SetMessageBoxText()
+    int searchAll = 0
+    int searchInventory = 1
+    int listInventory = 2
+    int mainMenu = 3
+    int back = 4
+    int result = EnchantThings_Menu_ChooseItem.Show()
+    if result == searchAll
+        return SearchAll()
+    elseIf result == searchInventory
+        return SearchInventory()
+    elseIf result == listInventory
+        return ChooseFromInventory()
+    elseIf result == mainMenu
+        MainMenu()
+    elseIf result == back
+        if theEnchantment
+            ViewEnchantment(theEnchantment)
+        else
+            MainMenu()
+        endIf
+    endIf
+endFunction
+
+Form function SearchAll()
+    string query = GetUserInput()
+    ; int searchResults = Search.ExecuteSearch(query)
+endFunction
+
+Form function SearchInventory()
+    Debug.MessageBox("TODO")
+endFunction
+
+Form function ChooseFromInventory()
+    Debug.MessageBox("TODO")
 endFunction
 
 string function GetUserInput(string defaultText = "") global
