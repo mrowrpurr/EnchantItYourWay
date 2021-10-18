@@ -1,22 +1,51 @@
 scriptName EnchantAllTheThings extends Quest
 
+; Before we ship this...
+;
+; Include a Fus Ro Dah-like effect on a sword...
+;
+; Make a single Magic Effect available for PushAway
+
+Actor property PlayerRef auto
+
 Message property EnchantThings_Menu_Main auto
 Message property EnchantThings_Menu_ViewEnchantment auto
 Message property EnchantThings_Menu_ManageEnchantments auto
 Message property EnchantThings_Menu_ChooseEnchantmentType auto
 Message property EnchantThings_Menu_ChooseItem auto
+Message property EnchantThings_Menu_ViewEnchanementMagicEffect auto
 
 Form property EnchantThings_MessageText_BaseForm auto
 
 float property CurrentlyInstalledVersion auto
+
+string property RecurringNotificationMessage auto
+float property RecurringNotificationMessageInterval auto
+
+float function GetCurrentVersion() global
+    return 1.0
+endFunction
 
 ; Mod Installation
 event OnInit()
     CurrentlyInstalledVersion = GetCurrentVersion()
 endEvent
 
-float function GetCurrentVersion() global
-    return 1.0
+event OnUpdate()
+    if RecurringNotificationMessage
+        Debug.Notification(RecurringNotificationMessage)
+        RegisterForSingleUpdate(RecurringNotificationMessageInterval)
+    endIf
+endEvent
+
+function ShowRecurringNotificatonMessage(string text, float interval = 3.0)
+    RecurringNotificationMessage = text
+    RecurringNotificationMessageInterval = interval
+    RegisterForSingleUpdate(0)
+endFunction
+
+function StopRecurringNotificationMessage()
+    RecurringNotificationMessage = ""
 endFunction
 
 function MainMenu()
@@ -44,28 +73,9 @@ function ManageEnchantments()
 endFunction
 
 function NewEnchantment()
-    SetMessageBoxText()
-    int armorType = 0
-    int weaponType = 1
-    int result = EnchantThings_Menu_ChooseEnchantmentType.Show()
-    if result == armorType
-        int theEnchantment = EnchantAllTheThings_Enchantment.Create("ARMOR")
-        ViewEnchantment(theEnchantment)
-    elseIf result == weaponType
-        int theEnchantment = EnchantAllTheThings_Enchantment.Create("WEAPON")
-        ViewEnchantment(theEnchantment)
-    endIf
-endFunction
-
-string function ChooseEnchantmentType()
-    int armorType = 0
-    int weaponType = 1
-    int result = EnchantThings_Menu_ChooseEnchantmentType.Show()
-    if result == armorType
-        return "ARMOR"
-    elseIf result == weaponType
-        return "WEAPON"
-    endIf
+    string enchantmentType = ChooseEnchantmentType()
+    int theEnchantment = EnchantAllTheThings_Enchantment.Create(enchantmentType)
+    ViewEnchantment(theEnchantment)
 endFunction
 
 function ViewEnchantment(int theEnchantment)
@@ -107,6 +117,7 @@ function ViewEnchantment(int theEnchantment)
     endIf
 endFunction
 
+; TODO extract ChooseMagicEffect
 function ViewEnchantment_AddMagicEffect(int theEnchantment)
     string query = GetUserInput()
 
@@ -165,13 +176,31 @@ function SetMessageBoxText(string text = "")
     endIf
 endFunction
 
+; TODO put the enchantment display text here!
 function EnchantItem(int theEnchantment)
     Form weaponOrArmor = ChooseItem( \
         theEnchantment = theEnchantment, \
         enchantmentType = EnchantAllTheThings_Enchantment.GetType(theEnchantment))
 
-    Debug.MessageBox("The item to enchant is: " + weaponOrArmor)
-    ; ....
+    Weapon theWeapon = weaponOrArmor as Weapon
+
+    if ! theWeapon
+        Debug.MessageBox("Sorry, we're only supporting weapons right now!")
+        return
+    endIf
+    
+    PlayerRef.EquipItemEx(theWeapon, equipSlot = 1)
+
+    Form[] theEffectForms = EnchantAllTheThings_Enchantment.GetMagicEffects(theEnchantment)
+
+    MagicEffect[] theEffects
+    if theEffectForms.Length == 1
+        theEffects = new MagicEffect[1]
+        ; theEffects[0] = theEffectForms
+    else
+        Debug.MessageBox("We only currently support 1 magic effect")
+        return
+    endIf
 endFunction
 
 Form function ChooseItem(string enchantmentType = "", int theEnchantment = 0)
@@ -186,11 +215,11 @@ Form function ChooseItem(string enchantmentType = "", int theEnchantment = 0)
     int back = 4
     int result = EnchantThings_Menu_ChooseItem.Show()
     if result == searchAll
-        return SearchAll()
+        return SearchAll(enchantmentType)
     elseIf result == searchInventory
-        return SearchInventory()
+        return SearchInventory(enchantmentType)
     elseIf result == listInventory
-        return ChooseFromInventory()
+        return ChooseFromInventory(enchantmentType)
     elseIf result == mainMenu
         MainMenu()
     elseIf result == back
@@ -202,17 +231,92 @@ Form function ChooseItem(string enchantmentType = "", int theEnchantment = 0)
     endIf
 endFunction
 
-Form function SearchAll()
+Form function SearchAll(string enchantmentType, bool showItemsWithEnchantments = false)
     string query = GetUserInput()
-    ; int searchResults = Search.ExecuteSearch(query)
+
+    ShowRecurringNotificatonMessage("Searching...")
+
+    string category = SearchCategoryForEnchantmentType(enchantmentType)
+    int searchResults = Search.ExecuteSearch(query, category)
+    JValue.retain(searchResults)
+
+    int itemDisplayNames = JArray.object()
+    JValue.retain(itemDisplayNames)
+
+    int categoryResultsCount = Search.GetResultCategoryCount(searchResults, category)
+    int i = 0
+    while i < categoryResultsCount
+        int itemResult = Search.GetNthResultInCategory(searchResults, category, i)
+        string name = Search.GetResultName(itemResult)
+        string formId = Search.GetResultFormID(itemResult)
+        if showItemsWithEnchantments
+            JArray.addStr(itemDisplayNames, name + " (" + formId + ")")
+        else
+            Form theItem = FormHelper.HexToForm(formId)
+            if ! IsEnchanted(theItem)
+                JArray.addStr(itemDisplayNames, name + " (" + formId + ")")
+            endIf
+        endIf
+        i += 1
+    endWhile
+
+    string itemDisplayText = GetUserSelection(JArray.asStringArray(itemDisplayNames))
+    int resultIndex = JArray.findStr(itemDisplayNames, itemDisplayText)
+    int itemResult = Search.GetNthResultInCategory(searchResults, category, resultIndex)
+    string formId = Search.GetResultFormID(itemResult)
+
+    JValue.release(searchResults)
+    JValue.release(itemDisplayNames)
+    StopRecurringNotificationMessage()
+
+    return FormHelper.HexToForm(formId)
 endFunction
 
-Form function SearchInventory()
+bool function IsEnchanted(Form item)
+    Enchantment theEnchantment
+    Weapon theWeapon = item as Weapon
+    Armor  theArmor  = item as Armor
+    if theWeapon
+        theEnchantment = theWeapon.GetEnchantment()
+        ; No can do!
+        ; if ! theEnchantment
+        ;     theEnchantment = WornObject.GetEnchantment()
+        ; endIf
+    elseIf theArmor
+        theEnchantment = theArmor.GetEnchantment()
+        if ! theEnchantment
+
+        endIf
+    endIf
+    return theEnchantment
+endFunction
+
+Form function SearchInventory(string enchantmentType)
     Debug.MessageBox("TODO")
 endFunction
 
-Form function ChooseFromInventory()
+Form function ChooseFromInventory(string enchantmentType)
     Debug.MessageBox("TODO")
+endFunction
+
+string function ChooseEnchantmentType()
+    SetMessageBoxText()
+    int armorType = 0
+    int weaponType = 1
+    int result = EnchantThings_Menu_ChooseEnchantmentType.Show()
+    if result == armorType
+        return "ARMOR"
+    elseIf result == weaponType
+        return "WEAPON"
+    endIf
+endFunction
+
+string function SearchCategoryForEnchantmentType(string enchantmentType)
+    if enchantmentType == "WEAPON"
+        return "WEAP"
+    elseIf enchantmentType == "ARMOR"
+        return "ARMO"
+    endIf
 endFunction
 
 string function GetUserInput(string defaultText = "") global
