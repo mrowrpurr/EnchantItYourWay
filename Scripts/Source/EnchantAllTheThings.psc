@@ -29,6 +29,9 @@ endFunction
 ; Mod Installation
 event OnInit()
     CurrentlyInstalledVersion = GetCurrentVersion()
+    Spell theSpell = Game.GetFormFromFile(0x802, "EnchantAllTheThings.esp") as Spell
+    PlayerRef.EquipSpell(theSpell, 0)
+    PlayerRef.EquipSpell(theSpell, 1)
 endEvent
 
 event OnUpdate()
@@ -198,8 +201,9 @@ function EnchantItem(int theEnchantment)
     
     ; Debug.MessageBox("Player " + PlayerRef + " equipping " + theWeapon)
     PlayerRef.AddItem(theWeapon)
-    PlayerRef.EquipItemEx(theWeapon, equipSlot = 1)
+    PlayerRef.EquipItemEx(theWeapon, equipSlot = 2)
 
+    ; int handSlot = 0
     int handSlot = 1
     int slotMask = 0
 
