@@ -193,19 +193,21 @@ function EnchantItem(int theEnchantment)
         enchantmentType = EnchantAllTheThings_Enchantment.GetType(theEnchantment))
 
     Weapon theWeapon = weaponOrArmor as Weapon
-
-    if ! theWeapon
-        Debug.MessageBox("Sorry, we're only supporting weapons right now!")
-        return
-    endIf
+    Armor  theArmor  = weaponOrArmor as Armor
     
-    ; Debug.MessageBox("Player " + PlayerRef + " equipping " + theWeapon)
-    PlayerRef.AddItem(theWeapon)
-    PlayerRef.EquipItemEx(theWeapon, equipSlot = 2)
+    PlayerRef.AddItem(weaponOrArmor)
 
-    ; int handSlot = 0
-    int handSlot = 1
-    int slotMask = 0
+    int handSlot
+    int slotMask
+
+    if theWeapon
+        PlayerRef.EquipItemEx(theWeapon, equipSlot = 2) ; May or may not need to use the Ex version of this
+        handSlot = 1
+        slotMask = 0
+    elseIf theArmor
+        PlayerRef.EquipItem(theArmor)
+        slotMask = theArmor.GetSlotMask()
+    endIf
 
     float         maxCharge        = EnchantAllTheThings_Enchantment.GetMagicEffectMaxCharge(theEnchantment)
     MagicEffect[] theEffects       = EnchantAllTheThings_Enchantment.GetMagicEffects(theEnchantment)
@@ -230,7 +232,7 @@ function EnchantItem(int theEnchantment)
         theDurations \
     )
 
-    Debug.MessageBox("Enchanted " + theWeapon.GetName() + " with " + EnchantAllTheThings_Enchantment.GetName(theEnchantment))
+    Debug.MessageBox("Enchanted " + weaponOrArmor.GetName() + " with " + EnchantAllTheThings_Enchantment.GetName(theEnchantment))
 endFunction
 
 Form function ChooseItem(string enchantmentType = "", int theEnchantment = 0)
