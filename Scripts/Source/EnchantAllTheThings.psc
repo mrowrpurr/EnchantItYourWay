@@ -407,30 +407,37 @@ Form function SearchAll(string enchantmentType, bool showItemsWithEnchantments =
     int itemDisplayNames = JArray.object()
     JValue.retain(itemDisplayNames)
 
+    int itemDisplayNamesToIndex = JMap.object()
+    JValue.retain(itemDisplayNamesToIndex)
+
     int categoryResultsCount = Search.GetResultCategoryCount(searchResults, category)
     int i = 0
     while i < categoryResultsCount
         int itemResult = Search.GetNthResultInCategory(searchResults, category, i)
         string name = Search.GetResultName(itemResult)
         string formId = Search.GetResultFormID(itemResult)
+        string displayName = name + " (" + formId + ")"
         if showItemsWithEnchantments
-            JArray.addStr(itemDisplayNames, name + " (" + formId + ")")
+            JArray.addStr(itemDisplayNames, displayName)
+            JMap.setInt(itemDisplayNamesToIndex, displayName, i)
         else
             Form theItem = FormHelper.HexToForm(formId)
             if ! IsEnchanted(theItem)
-                JArray.addStr(itemDisplayNames, name + " (" + formId + ")")
+                JArray.addStr(itemDisplayNames, displayName)
+                JMap.setInt(itemDisplayNamesToIndex, displayName, i)
             endIf
         endIf
         i += 1
     endWhile
 
     string itemDisplayText = GetUserSelection(JArray.asStringArray(itemDisplayNames))
-    int resultIndex = JArray.findStr(itemDisplayNames, itemDisplayText)
+    int resultIndex = JMap.getInt(itemDisplayNamesToIndex, itemDisplayText)
     int itemResult = Search.GetNthResultInCategory(searchResults, category, resultIndex)
     string formId = Search.GetResultFormID(itemResult)
 
     JValue.release(searchResults)
     JValue.release(itemDisplayNames)
+    JValue.release(itemDisplayNamesToIndex)
     StopRecurringNotificationMessage()
 
     return FormHelper.HexToForm(formId)
