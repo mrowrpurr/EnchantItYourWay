@@ -10,6 +10,7 @@ function SetName(string enchantmentType, string magicEffectName, string name) gl
     int currentObject = JMap.getObj(magicEffectsForType, magicEffectName)
     JMap.setObj(magicEffectsForType, name, currentObject)
     JMap.removeKey(magicEffectsForType, magicEffectName)
+    Save()
 endFunction
 
 bool function MagicEffectExists(string enchantmentType, string magicEffectName) global
@@ -32,6 +33,10 @@ function LoadFromFile() global
     if fileData
         JDB.solveObjSetter(".enchantAllTheThings.magicEffects", fileData, createMissingKeys = true)
     endIf
+endFunction
+
+int function _getMagicEffect(string enchantmentType, string magicEffectName) global
+    return JMap.getObj(_getMagicEffectsMapForType(enchantmentType), magicEffectName)
 endFunction
 
 int function _getMagicEffectsMapForType(string enchantmentType) global
