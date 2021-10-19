@@ -22,8 +22,8 @@ bool function MagicEffectExists(string enchantmentType, string magicEffectName, 
     return JMap.hasKey(magicEffectsForType, magicEffectName)
 endFunction
 
-string[] function GetAllMagicEffectNames(string enchantmentType) global
-    return JMap.allKeysPArray(_getMagicEffectsMap(enchantmentType))
+string[] function GetAllMagicEffectNames(string enchantmentType, string enchantmentName = "") global
+    return JMap.allKeysPArray(_getMagicEffectsMap(enchantmentType, enchantmentName))
 endFunction
 
 function Save() global

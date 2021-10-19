@@ -29,8 +29,38 @@ bool function HasAnyMagicEffects(string enchantmentType, string enchantmentName)
     return JMap.count(_getMagicEffectsMap(enchantmentType, enchantmentName)) > 0
 endFunction
 
+string[] function GetMagicEffectNames(string enchantmentType, string enchantmentName) global
+    return JMap.allKeysPArray(_getMagicEffectsMap(enchantmentType, enchantmentName))
+endFunction
+
 MagicEffect[] function GetMagicEffects(string enchantmentType, string enchantmentName) global
-    ;
+    int magicEffectsMap       = _getMagicEffectsMap(enchantmentType, enchantmentName)
+    string[] magicEffectNames = JMap.allKeysPArray(magicEffectsMap)
+    int magicEffectCount      = magicEffectNames.Length
+    ; Initialize Magic Effects
+    ; This has to be manually done for each size
+    ; because SKSE cannot generate MagicEffect[]
+    ; of a dynamic size :(
+    MagicEffect[] magicEffects
+    if magicEffectCount == 1
+        magicEffects = new MagicEffect[1]
+    elseIf magicEffectCount == 2
+        magicEffects = new MagicEffect[2]
+    elseIf magicEffectCount == 3
+        magicEffects = new MagicEffect[3]
+    else
+        Debug.MessageBox("No support yet for more than 3 magic effects")
+        return magicEffects
+    endIf
+    ; Fill the array
+    int i = 0
+    while i < magicEffectCount
+        int magicEffectObject = JMap.getObj(magicEffectsMap, magicEffectNames[i])
+        MagicEffect theMagicEffect = JMap.getForm(magicEffectObject, "Effect") as MagicEffect
+        magicEffects[i] = theMagicEffect
+        i += 1
+    endWhile
+    return magicEffects
 endFunction
 
 function AddMagicEffect(string enchantmentType, string enchantmentName, string magicEffectName) global
