@@ -1,0 +1,8 @@
+{
+    "Fire Damage": {
+        "Effect": "__formData|Skyrim.esm|0x4605a"
+    },
+    "Frost Damage": {
+        "Effect": "__formData|Skyrim.esm|0x4605b"
+    }
+}

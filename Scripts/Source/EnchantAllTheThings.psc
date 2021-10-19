@@ -3,11 +3,15 @@ scriptName EnchantAllTheThings extends Quest
 Actor property PlayerRef auto
 
 Message property EnchantThings_Menu_Main auto
+
+Message property EnchantThings_Menu_ManageEnchantmentsLibrary auto
 Message property EnchantThings_Menu_ViewEnchantment auto
-Message property EnchantThings_Menu_ManageEnchantments auto
 Message property EnchantThings_Menu_ChooseEnchantmentType auto
+
+Message property EnchantThings_Menu_ManageMagicEffectsLibrary auto
+Message property EnchantThings_Menu_ViewMagicEffect auto
+
 Message property EnchantThings_Menu_ChooseItem auto
-Message property EnchantThings_Menu_ViewEnchanementMagicEffect auto
 
 Form property EnchantThings_MessageText_BaseForm auto
 
@@ -82,7 +86,7 @@ function ManageEnchantments()
     int newEnchantment = 0
     int viewEnchantment = 1
     int mainMenu = 2
-    int result = EnchantThings_Menu_ManageEnchantments.Show()
+    int result = EnchantThings_Menu_ManageEnchantmentsLibrary.Show()
     if result == newEnchantment
         NewEnchantment()
     elseIf result == viewEnchantment
@@ -132,7 +136,7 @@ function ViewEnchantment(int theEnchantment)
     elseIf result == addMagicEffect
         ViewEnchantment_AddMagicEffect(theEnchantment)
     elseIf result == modifyMagicEffect
-        ; ; ; ModifyMagicEffect(theEnchantment)
+        ViewEnchantment_ModifyMagicEffect(theEnchantment)
     elseIf result == deleteMagicEffect
         ; ; ; DeleteMagicEffect(theEnchantment)
     elseIf result == enchantItem
@@ -200,6 +204,15 @@ function ViewEnchantment_AddMagicEffect(int theEnchantment)
     ViewEnchantment(theEnchantment)
 endFunction
 
+function ViewEnchantment_ModifyMagicEffect(int theEnchantment)
+    int theMagicEffect = ChooseMagicEffect(theEnchantment)
+    if theMagicEffect
+        Debug.MessageBox("Yay magic effect #" + theMagicEffect)
+    else
+        ViewEnchantment(theEnchantment)
+    endIf
+endFunction
+
 ; TODO put the enchantment display text here!
 function EnchantItem(int theEnchantment)
     Form weaponOrArmor = ChooseItem( \
@@ -258,6 +271,10 @@ int function ChooseEnchantment()
     string selectedEnchantmentName = GetUserSelection(enchantmentNames)
     int theEnchantment = EnchantAllTheThings_Enchantment.GetEnchantmentByName(selectedEnchantmentName)
     return theEnchantment
+endFunction
+
+int function ChooseMagicEffect(int theEnchantment)
+    
 endFunction
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
