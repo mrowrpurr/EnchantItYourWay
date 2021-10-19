@@ -76,7 +76,7 @@ function MainMenu()
     int magicEffectsLibrary = 2
     int result = EnchantThings_Menu_Main.Show()
     if result == enchantItem
-        Debug.MessageBox("TODO")
+        ChooseItem(ChooseEnchantmentType())
     elseIf result == enchantmentsLibrary
         ManageEnchantments()
     elseIf result == magicEffectsLibrary
@@ -149,7 +149,7 @@ function ViewEnchantment(string enchantmentType, string enchantmentName)
     int mainMenu = 4
     int result = EnchantThings_Menu_ViewEnchantment.Show()
     if result == enchantItem
-        ; EnchantItem(theEnchantment)
+        EnchantItem(enchantmentType, enchantmentName)
     elseIf result == rename
         ViewEnchanment_Rename(enchantmentType, enchantmentName)
         ViewEnchantment(enchantmentType, enchantmentName)
@@ -197,32 +197,40 @@ string function ViewEnchanment_Rename(string enchantmentType, string enchantment
 endFunction
 
 function EnchantItem(string enchantmentType, string enchantmentName)
-    ; Form weaponOrArmor = ChooseItem( \
-    ;     theEnchantment = theEnchantment, \
-    ;     enchantmentType = EnchantAllTheThings_Enchantment.GetType(theEnchantment))
+    Form weaponOrArmor = ChooseItem(enchantmentType, enchantmentName)
 
-    ; Weapon theWeapon = weaponOrArmor as Weapon
-    ; Armor  theArmor  = weaponOrArmor as Armor
-    
-    ; PlayerRef.AddItem(weaponOrArmor)
+    Weapon theWeapon = weaponOrArmor as Weapon
+    Armor  theArmor  = weaponOrArmor as Armor
 
-    ; int handSlot
-    ; int slotMask
+    int handSlot
+    int slotMask
 
-    ; if theWeapon
-    ;     PlayerRef.EquipItemEx(theWeapon, equipSlot = 2) ; May or may not need to use the Ex version of this
-    ;     handSlot = 1
-    ;     slotMask = 0
-    ; elseIf theArmor
-    ;     PlayerRef.EquipItem(theArmor)
-    ;     slotMask = theArmor.GetSlotMask()
-    ; endIf
+    if theWeapon
+        slotMask = 0
+        handSlot = 1
+        ; EquipSlot bothHands = Game.GetForm(0x13F45) as EquipSlot ; TODO map this via Creation Kit
+        ; EquipSlot equipType = theWeapon.GetEquipType()
+        ; if equipType == bothHands
+        ;     handSlot = 0
+        ; else
+        ;     handSlot = 1
+        ; endIf
+    else
+        handSlot = 0
+        slotMask = theArmor.GetSlotMask()
+    endIf
+
+    PlayerRef.AddItem(weaponOrArmor)
+    PlayerRef.EquipItem(weaponOrArmor)
 
     ; float         maxCharge        = EnchantAllTheThings_Enchantment.GetMagicEffectMaxCharge(theEnchantment)
-    ; MagicEffect[] theEffects       = EnchantAllTheThings_Enchantment.GetMagicEffects(theEnchantment)
-    ; float[]       theMagnitudes    = EnchantAllTheThings_Enchantment.GetMagicEffectMagnitudes(theEnchantment)
-    ; int[]         theAreaOfEffects = EnchantAllTheThings_Enchantment.GetMagicEffectAreaOfEffects(theEnchantment)
-    ; int[]         theDurations     = EnchantAllTheThings_Enchantment.GetMagicEffectDurations(theEnchantment)
+
+    float maxCharge = 1
+
+    MagicEffect[] theEffects       = EnchantAllTheThings_Enchantment.GetMagicEffects(enchantmentType, enchantmentName)
+    float[]       theMagnitudes    = EnchantAllTheThings_Enchantment.GetMagicEffectMagnitudes(enchantmentType, enchantmentName)
+    int[]         theAreaOfEffects = EnchantAllTheThings_Enchantment.GetMagicEffectAreaOfEffects(enchantmentType, enchantmentName)
+    int[]         theDurations     = EnchantAllTheThings_Enchantment.GetMagicEffectDurations(enchantmentType, enchantmentName)
 
     ; Debug.MessageBox(maxCharge)
     ; Debug.MessageBox(theEffects)
@@ -230,18 +238,18 @@ function EnchantItem(string enchantmentType, string enchantmentName)
     ; Debug.MessageBox(theAreaOfEffects)
     ; Debug.MessageBox(theDurations)
 
-    ; WornObject.CreateEnchantment( \
-    ;     PlayerRef, \
-    ;     handSlot, \
-    ;     slotMask, \
-    ;     maxCharge, \
-    ;     theEffects, \
-    ;     theMagnitudes, \
-    ;     theAreaOfEffects, \
-    ;     theDurations \
-    ; )
+    WornObject.CreateEnchantment( \
+        PlayerRef, \
+        handSlot, \
+        slotMask, \
+        maxCharge, \
+        theEffects, \
+        theMagnitudes, \
+        theAreaOfEffects, \
+        theDurations \
+    )
 
-    ; Debug.MessageBox("Enchanted " + weaponOrArmor.GetName() + " with " + EnchantAllTheThings_Enchantment.GetName(theEnchantment))
+    Debug.MessageBox("Enchanted " + weaponOrArmor.GetName() + " with " + enchantmentName)
 endFunction
 
 string function ChooseEnchantment(string enchantmentType)
@@ -279,7 +287,7 @@ function ViewMagicEffect(string enchantmentType, string magicEffectName, string 
     int back = 6
     int mainMenu = 7
     int result = EnchantThings_Menu_ViewMagicEffect.Show()
-    
+
     if result == rename
         string newName = ViewMagicEffect_Rename(enchantmentType, magicEffectName, enchantmentName)
         ViewMagicEffect(enchantmentType, newName, enchantmentName)
@@ -359,7 +367,7 @@ int function ChooseMagicEffectFromEnchantment(int theEnchantment)
     Debug.MessageBox("TODO")    
 endFunction
 
-Form function ChooseItem(string enchantmentType = "", int theEnchantment = 0)
+Form function ChooseItem(string enchantmentType, string enchantmentName = "")
     if ! enchantmentType
         enchantmentType = ChooseEnchantmentType()
     endIf
@@ -379,8 +387,8 @@ Form function ChooseItem(string enchantmentType = "", int theEnchantment = 0)
     elseIf result == mainMenu
         MainMenu()
     elseIf result == back
-        if theEnchantment
-            ; ViewEnchantment(enchantmentType, enchantmentName)
+        if enchantmentName
+            ViewEnchantment(enchantmentType, enchantmentName)
         else
             MainMenu()
         endIf
@@ -535,61 +543,3 @@ string function GetUserSelection(string[] options, bool showFilter = true, strin
         endIf
     endIf
 endFunction
-
-; TODO extract ChooseMagicEffectFromEnchantment
-; function ViewEnchantment_AddMagicEffect_Search(string enchantmentType, string enchantmentName)
-;     string query = GetUserInput()
-
-;     int searchResults = Search.ExecuteSearch(query, "MGEF")
-;     JValue.retain(searchResults)
-;     int effectCount = Search.GetResultCategoryCount(searchResults, "MGEF")
-
-;     int effectDisplayNames = JArray.object()
-;     JValue.retain(effectDisplayNames)
-
-;     int effectDisplayNameIndexes = JMap.object()
-;     JValue.retain(effectDisplayNameIndexes)
-
-;     int i = 0
-;     while i < effectCount
-;         int effectResult = Search.GetNthResultInCategory(searchResults, "MGEF", i)
-;         string effectName = Search.GetResultName(effectResult)
-;         string formId = Search.GetResultFormID(effectResult)
-;         MagicEffect theEffect = FormHelper.HexToForm(formId) as MagicEffect
-
-;         if theEffect
-;             ; Contant Effects on Self
-;             if EnchantAllTheThings_Enchantment.IsArmorType(theEnchantment) && \
-;                 theEffect.GetCastingType() == 0 && \
-;                 theEffect.GetDeliveryType() == 0
-;                 JArray.addStr(effectDisplayNames, effectName + " (" + formId + ")")
-;                 JMap.setInt(effectDisplayNameIndexes, effectName + " (" + formId + ")", i)
-
-;             ; Fire and Forget on Contact
-;             elseIf EnchantAllTheThings_Enchantment.IsWeaponType(theEnchantment) && \
-;                 theEffect.GetCastingType() == 1 && \
-;                 theEffect.GetDeliveryType() == 1
-;                 JArray.addStr(effectDisplayNames, effectName + " (" + formId + ")")
-;                 JMap.setInt(effectDisplayNameIndexes, effectName + " (" + formId + ")", i)
-
-;             endIf
-;         endIf
-;         i += 1
-;     endWhile
-
-;     string effectNameText = GetUserSelection(JArray.asStringArray(effectDisplayNames))
-;     int resultIndex = JMap.getInt(effectDisplayNameIndexes, effectNameText)
-;     int effectResult = Search.GetNthResultInCategory(searchResults, "MGEF", resultIndex)
-;     string formId = Search.GetResultFormID(effectResult)
-
-;     MagicEffect theEffect = FormHelper.HexToForm(formId) as MagicEffect
-;     EnchantAllTheThings_Enchantment.AddMagicEffect(theEnchantment, theEffect)
-
-;     Debug.MessageBox("Added " + theEffect.GetName() + " " + formId + " to " + EnchantAllTheThings_Enchantment.GetName(theEnchantment))
-
-;     JValue.release(effectDisplayNames)
-;     JValue.release(effectDisplayNameIndexes)
-;     JValue.release(searchResults)
-
-;     ViewEnchantment(theEnchantment)
-; endFunction

@@ -49,8 +49,14 @@ MagicEffect[] function GetMagicEffects(string enchantmentType, string enchantmen
         magicEffects = new MagicEffect[2]
     elseIf magicEffectCount == 3
         magicEffects = new MagicEffect[3]
+    elseIf magicEffectCount == 4
+        magicEffects = new MagicEffect[4]
+    elseIf magicEffectCount == 5
+        magicEffects = new MagicEffect[5]
+    elseIf magicEffectCount == 6
+        magicEffects = new MagicEffect[6]
     else
-        Debug.MessageBox("No support yet for more than 3 magic effects")
+        Debug.MessageBox("No support yet for more than 6 magic effects")
         return magicEffects
     endIf
     ; Fill the array
@@ -62,6 +68,48 @@ MagicEffect[] function GetMagicEffects(string enchantmentType, string enchantmen
         i += 1
     endWhile
     return magicEffects
+endFunction
+
+float[] function GetMagicEffectMagnitudes(string enchantmentType, string enchantmentName) global
+    int magicEffectsMap       = _getMagicEffectsMap(enchantmentType, enchantmentName)
+    string[] magicEffectNames = JMap.allKeysPArray(magicEffectsMap)
+    float[] magnitudes        = Utility.CreateFloatArray(magicEffectNames.Length)
+    int i = 0
+    while i < magicEffectNames.Length
+        int magicEffectObject = JMap.getObj(magicEffectsMap, magicEffectNames[i])
+        float magnitude = JMap.getFlt(magicEffectObject, "Magnitude") as float
+        magnitudes[i] = magnitude
+        i += 1
+    endWhile
+    return magnitudes
+endFunction
+
+int[] function GetMagicEffectDurations(string enchantmentType, string enchantmentName) global
+    int magicEffectsMap       = _getMagicEffectsMap(enchantmentType, enchantmentName)
+    string[] magicEffectNames = JMap.allKeysPArray(magicEffectsMap)
+    int[] durations           = Utility.CreateIntArray(magicEffectNames.Length)
+    int i = 0
+    while i < magicEffectNames.Length
+        int magicEffectObject = JMap.getObj(magicEffectsMap, magicEffectNames[i])
+        int duration = JMap.getFlt(magicEffectObject, "Duration") as int
+        durations[i] = duration
+        i += 1
+    endWhile
+    return durations
+endFunction
+
+int[] function GetMagicEffectAreaOfEffects(string enchantmentType, string enchantmentName) global
+    int magicEffectsMap       = _getMagicEffectsMap(enchantmentType, enchantmentName)
+    string[] magicEffectNames = JMap.allKeysPArray(magicEffectsMap)
+    int[] areaOfEffects           = Utility.CreateIntArray(magicEffectNames.Length)
+    int i = 0
+    while i < magicEffectNames.Length
+        int magicEffectObject = JMap.getObj(magicEffectsMap, magicEffectNames[i])
+        int areaOfEffect = JMap.getFlt(magicEffectObject, "AreaOfEffect") as int
+        areaOfEffects[i] = areaOfEffect
+        i += 1
+    endWhile
+    return areaOfEffects
 endFunction
 
 function AddMagicEffect(string enchantmentType, string enchantmentName, string magicEffectName) global
