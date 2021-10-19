@@ -99,14 +99,9 @@ function ManageEnchantments()
     if result == createNew
         CreateNewEnchantment()
     elseIf result == viewEnchantment
+        string enchantmentType = ChooseEnchantmentType()
         string enchantmentName = ChooseEnchantment(ChooseEnchantmentType())
-        ; if theEnchantment_Search
-        ;     string enchamentType = ChooseEnchantmentType()
-        ;     string enchantmentName = ChooseEnchantment()
-        ;     ViewEnchantment(enchantmentType, enchantmentName)
-        ; else
-        ;     ManageEnchantments()
-        ; endIf
+        ViewEnchantment(enchantmentType, enchantmentName)
     elseIf result == mainMenu
         MainMenu()
     endIf
@@ -346,7 +341,7 @@ function ManageMagicEffects()
     endIf
 endFunction
 
-function ViewMagicEffect(string enchantmentType, string magicEffectName)
+function ViewMagicEffect(string enchantmentType, string magicEffectName, string enchantmentName = "")
     SetMessageBoxText("Magic Effect: " + magicEffectName)
     int rename = 0
     int setMagnitude = 1
@@ -358,8 +353,8 @@ function ViewMagicEffect(string enchantmentType, string magicEffectName)
     int mainMenu = 7
     int result = EnchantThings_Menu_ViewMagicEffect.Show()
     if result == rename
-        string newName = ViewMagicEffect_Rename(enchantmentType, magicEffectName)
-        ViewMagicEffect(enchantmentType, newName)
+        string newName = ViewMagicEffect_Rename(enchantmentType, magicEffectName, enchantmentName)
+        ViewMagicEffect(enchantmentType, newName, enchantmentName)
     elseIf result == setMagnitude
 
     elseIf result == setDuration
@@ -381,7 +376,7 @@ function ViewMagicEffect(string enchantmentType, string magicEffectName)
     endIf
 endFunction
 
-string function ViewMagicEffect_Rename(string enchantmentType, string magicEffectName)
+string function ViewMagicEffect_Rename(string enchantmentType, string magicEffectName, string enchantmentName)
     bool uniqueName
     string newName
     while ! uniqueName
@@ -390,9 +385,9 @@ string function ViewMagicEffect_Rename(string enchantmentType, string magicEffec
         else
             newName = GetUserInput(magicEffectName)
         endIf
-        uniqueName = ! EnchantAllTheThings_MagicEffect.MagicEffectExists(enchantmentType, newName)
+        uniqueName = ! EnchantAllTheThings_MagicEffect.MagicEffectExists(enchantmentType, newName, enchantmentName)
     endWhile
-    EnchantAllTheThings_MagicEffect.SetName(enchantmentType, magicEffectName, newName)
+    EnchantAllTheThings_MagicEffect.SetName(enchantmentType, magicEffectName, newName, enchantmentName)
     return newName
 endFunction
 

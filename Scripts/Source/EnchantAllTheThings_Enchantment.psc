@@ -54,6 +54,11 @@ function LoadFromFile() global
     endIf
 endFunction
 
+int function _getMagicEffect(string enchantmentType, string enchantmentName, string magicEffectName) global
+    int magicEffectsMap = _getMagicEffectsMap(enchantmentType, enchantmentName)
+    return JMap.getObj(magicEffectsMap, magicEffectName)
+endFunction
+
 int function _getMagicEffectsMap(string enchantmentType, string enchantmentName) global
     int theEnchantment = _getEnchantment(enchantmentType, enchantmentName)
     return JMap.getObj(theEnchantment, "magicEffects")

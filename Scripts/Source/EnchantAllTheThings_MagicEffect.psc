@@ -5,21 +5,25 @@ int function Create(string enchantmentType) global
     Debug.MessageBox("TODO")
 endFunction
 
-function SetName(string enchantmentType, string magicEffectName, string name) global
-    int magicEffectsForType = _getMagicEffectsMapForType(enchantmentType)
+function SetName(string enchantmentType, string magicEffectName, string name, string enchantmentName = "") global
+    int magicEffectsForType = _getMagicEffectsMap(enchantmentType, enchantmentName)
     int currentObject = JMap.getObj(magicEffectsForType, magicEffectName)
     JMap.setObj(magicEffectsForType, name, currentObject)
     JMap.removeKey(magicEffectsForType, magicEffectName)
-    Save()
+    if enchantmentName
+        EnchantAllTheThings_Enchantment.Save()
+    else
+        Save()
+    endIf
 endFunction
 
-bool function MagicEffectExists(string enchantmentType, string magicEffectName) global
-    int magicEffectsForType = _getMagicEffectsMapForType(enchantmentType)
+bool function MagicEffectExists(string enchantmentType, string magicEffectName, string enchantmentName = "") global
+    int magicEffectsForType = _getMagicEffectsMap(enchantmentType, enchantmentName)
     return JMap.hasKey(magicEffectsForType, magicEffectName)
 endFunction
 
 string[] function GetAllMagicEffectNames(string enchantmentType) global
-    return JMap.allKeysPArray(_getMagicEffectsMapForType(enchantmentType))
+    return JMap.allKeysPArray(_getMagicEffectsMap(enchantmentType))
 endFunction
 
 function Save() global
@@ -35,12 +39,20 @@ function LoadFromFile() global
     endIf
 endFunction
 
-int function _getMagicEffect(string enchantmentType, string magicEffectName) global
-    return JMap.getObj(_getMagicEffectsMapForType(enchantmentType), magicEffectName)
+int function _getMagicEffect(string enchantmentType, string magicEffectName, string enchantmentName = "") global
+    if enchantmentName
+        return EnchantAllTheThings_Enchantment._getMagicEffect(enchantmentType, enchantmentName, magicEffectName)
+    else
+        return JMap.getObj(_getMagicEffectsMap(enchantmentType), magicEffectName)
+    endIf
 endFunction
 
-int function _getMagicEffectsMapForType(string enchantmentType) global
-    return JMap.getObj(_getAllMagicEffectsMap(), enchantmentType)
+int function _getMagicEffectsMap(string enchantmentType, string enchantmentName = "") global
+    if enchantmentName
+        return EnchantAllTheThings_Enchantment._getMagicEffectsMap(enchantmentType, enchantmentName)
+    else
+        return JMap.getObj(_getAllMagicEffectsMap(), enchantmentType)
+    endIf
 endFunction
 
 int function _getAllMagicEffectsMap() global
