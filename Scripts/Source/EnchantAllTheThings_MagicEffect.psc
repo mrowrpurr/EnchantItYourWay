@@ -1,7 +1,7 @@
 scriptName EnchantAllTheThings_MagicEffect
 {Represents the 'Enchant All The Things' version of a magic effect}
 
-int function Create(string enchantmentType) global
+int function Create(string enchantmentType, MagicEffect theMagicEffect) global
     Debug.MessageBox("TODO")
 endFunction
 
