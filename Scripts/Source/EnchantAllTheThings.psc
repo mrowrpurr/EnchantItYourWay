@@ -31,10 +31,15 @@ endFunction
 
 ; Mod Installation
 event OnInit()
+    Debug.MessageBox("Installation")
+
     CurrentlyInstalledVersion = GetCurrentVersion()
     Spell theSpell = Game.GetFormFromFile(0x802, "EnchantAllTheThings.esp") as Spell
     PlayerRef.EquipSpell(theSpell, 0)
     PlayerRef.EquipSpell(theSpell, 1)
+
+    ; Load Config Files
+    EnchantAllTheThings_MagicEffect.LoadFromFile()
 endEvent
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -68,12 +73,15 @@ endFunction
 function MainMenu()
     SetMessageBoxText()
     int enchantItem = 0
-    int enchantments = 1
+    int enchantmentsLibrary = 1
+    int magicEffectsLibrary = 2
     int result = EnchantThings_Menu_Main.Show()
     if result == enchantItem
         Debug.MessageBox("TODO")
-    elseIf result == enchantments
+    elseIf result == enchantmentsLibrary
         ManageEnchantments()
+    elseIf result == magicEffectsLibrary
+        ManageMagicEffects()
     endIf
 endFunction
 
@@ -83,12 +91,14 @@ endFunction
 
 function ManageEnchantments()
     SetMessageBoxText()
-    int newEnchantment = 0
-    int viewEnchantment = 1
-    int mainMenu = 2
+    int createNew = 0
+    int remove = 1
+    int rename = 2
+    int viewEnchantment = 3
+    int mainMenu = 4
     int result = EnchantThings_Menu_ManageEnchantmentsLibrary.Show()
-    if result == newEnchantment
-        NewEnchantment()
+    if result == createNew
+        CreateNewEnchantment()
     elseIf result == viewEnchantment
         int theEnchantment = ChooseEnchantment()
         if theEnchantment
@@ -101,7 +111,7 @@ function ManageEnchantments()
     endIf
 endFunction
 
-function NewEnchantment()
+function CreateNewEnchantment()
     string enchantmentType = ChooseEnchantmentType()
     int theEnchantment = EnchantAllTheThings_Enchantment.Create(enchantmentType)
     ViewEnchantment(theEnchantment)
@@ -146,7 +156,7 @@ function ViewEnchantment(int theEnchantment)
     endIf
 endFunction
 
-; TODO extract ChooseMagicEffect
+; TODO extract ChooseMagicEffectFromEnchantment
 function ViewEnchantment_AddMagicEffect(int theEnchantment)
     string query = GetUserInput()
 
@@ -205,7 +215,7 @@ function ViewEnchantment_AddMagicEffect(int theEnchantment)
 endFunction
 
 function ViewEnchantment_ModifyMagicEffect(int theEnchantment)
-    int theMagicEffect = ChooseMagicEffect(theEnchantment)
+    int theMagicEffect = ChooseMagicEffectFromEnchantment(theEnchantment)
     if theMagicEffect
         Debug.MessageBox("Yay magic effect #" + theMagicEffect)
     else
@@ -273,8 +283,37 @@ int function ChooseEnchantment()
     return theEnchantment
 endFunction
 
-int function ChooseMagicEffect(int theEnchantment)
-    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+function ManageMagicEffects()
+    int add = 0
+    int remove = 1
+    int rename = 2
+    int viewMagicEffect = 3
+    int mainMenu = 4
+    int result = EnchantThings_Menu_ManageMagicEffectsLibrary.Show()
+    if result == add
+    elseIf result == remove
+    elseIf result == rename
+    elseIf result == viewMagicEffect
+        string enchantmentType = ChooseEnchantmentType()
+        int theMagicEffect = ChooseMagicEffect(enchantmentType)
+    elseIf result == mainMenu
+        MainMenu()
+    endIf
+endFunction
+
+int function ChooseMagicEffect(string enchantmentType)
+    string[] magicEffectNames = EnchantAllTheThings_MagicEffect.GetAllMagicEffectNames(enchantmentType)
+    Debug.MessageBox(magicEffectNames)
+    string magicEffectName = GetUserSelection(magicEffectNames)
+    Debug.MessageBox("Effect: " + magicEffectName)
+endFunction
+
+int function ChooseMagicEffectFromEnchantment(int theEnchantment)
+    Debug.MessageBox("TODO")    
 endFunction
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
