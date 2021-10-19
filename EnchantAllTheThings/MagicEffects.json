@@ -1,8 +1,45 @@
 {
-    "Fire Damage": {
-        "Effect": "__formData|Skyrim.esm|0x4605a"
+    "Weapon Enchantments": {
+        "Fus Ro Dah": {
+            "Effect": "__formData|EnchantAllTheThings_BonusEffects.esp|0xd62"
+        },
+        "Absorb Health": {
+            "Effect": "__formData|Skyrim.esm|0xaa155"
+        },
+        "Absorb Magicka": {
+            "Effect": "__formData|Skyrim.esm|0xaa156"
+        },
+        "Absorb Stamina": {
+            "Effect": "__formData|Skyrim.esm|0xaa157"
+        },
+        "Magicka Damage": {
+            "Effect": "__formData|Skyrim.esm|0x5b44f"
+        },
+        "Paralysis": {
+            "Effect": "__formData|Skyrim.esm|0xacbb6"
+        },
+        "Soul Trap": {
+            "Effect": "__formData|Skyrim.esm|0x5b452"
+        },
+        "Fire Damage": {
+            "Effect": "__formData|Skyrim.esm|0x4605a"
+        },
+        "Frost Damage": {
+            "Effect": "__formData|Skyrim.esm|0x4605b"
+        },
+        "Shock Damage": {
+            "Effect": "__formData|Skyrim.esm|0x4605c"
+        }
     },
-    "Frost Damage": {
-        "Effect": "__formData|Skyrim.esm|0x4605b"
+    "Armor Enchantments": {
+        "Fortify Archery": {
+            "Effect": "__formData|Skyrim.esm|0x7a0fe"
+        },
+        "Fortify Health": {
+            "Effect": "__formData|Skyrim.esm|0x493aa"
+        },
+        "Invisibility": {
+            "Effect": "__formData|EnchantAllTheThings_BonusEffects.esp|0x800"
+        }
     }
 }
