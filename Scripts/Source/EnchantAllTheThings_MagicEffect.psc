@@ -17,6 +17,58 @@ function SetName(string enchantmentType, string magicEffectName, string name, st
     endIf
 endFunction
 
+float function GetMagnitude(string enchantmentType, string magicEffectName, string enchantmentName = "") global
+    return JMap.getFlt(_getMagicEffect(enchantmentType, magicEffectName, enchantmentName), "Magnitude")
+endFunction
+
+function SetMagnitude(string enchantmentType, string magicEffectName, float magnitude, string enchantmentName = "") global
+    JMap.setFlt(_getMagicEffect(enchantmentType, magicEffectName, enchantmentName), "Magnitude", magnitude)
+    if enchantmentName
+        EnchantAllTheThings_Enchantment.Save()
+    else
+        Save()
+    endIf
+endFunction
+
+int function GetAreaOfEffect(string enchantmentType, string magicEffectName, string enchantmentName = "") global
+    return JMap.getInt(_getMagicEffect(enchantmentType, magicEffectName, enchantmentName), "AreaOfEffect")
+endFunction
+
+function SetAreaOfEffect(string enchantmentType, string magicEffectName, int areaOfEffect, string enchantmentName = "") global
+    JMap.setInt(_getMagicEffect(enchantmentType, magicEffectName, enchantmentName), "AreaOfEffect", areaOfEffect)
+    if enchantmentName
+        EnchantAllTheThings_Enchantment.Save()
+    else
+        Save()
+    endIf
+endFunction
+
+int function GetDuration(string enchantmentType, string magicEffectName, string enchantmentName = "") global
+    return JMap.getInt(_getMagicEffect(enchantmentType, magicEffectName, enchantmentName), "Duration")
+endFunction
+
+function SetDuration(string enchantmentType, string magicEffectName, int duration, string enchantmentName = "") global
+    JMap.setInt(_getMagicEffect(enchantmentType, magicEffectName, enchantmentName), "Duration", duration)
+    if enchantmentName
+        EnchantAllTheThings_Enchantment.Save()
+    else
+        Save()
+    endIf
+endFunction
+
+int function GetBaseCost(string enchantmentType, string magicEffectName, string enchantmentName = "") global
+    return JMap.getInt(_getMagicEffect(enchantmentType, magicEffectName, enchantmentName), "BaseCost")
+endFunction
+
+function SetBaseCost(string enchantmentType, string magicEffectName, int baseCost, string enchantmentName = "") global
+    JMap.setInt(_getMagicEffect(enchantmentType, magicEffectName, enchantmentName), "BaseCost", baseCost)
+    if enchantmentName
+        EnchantAllTheThings_Enchantment.Save()
+    else
+        Save()
+    endIf
+endFunction
+
 bool function MagicEffectExists(string enchantmentType, string magicEffectName, string enchantmentName = "") global
     int magicEffectsForType = _getMagicEffectsMap(enchantmentType, enchantmentName)
     return JMap.hasKey(magicEffectsForType, magicEffectName)
@@ -38,6 +90,8 @@ function LoadFromFile() global
         JDB.solveObjSetter(".enchantAllTheThings.magicEffects", fileData, createMissingKeys = true)
     endIf
 endFunction
+
+; Private
 
 int function _getMagicEffect(string enchantmentType, string magicEffectName, string enchantmentName = "") global
     if enchantmentName

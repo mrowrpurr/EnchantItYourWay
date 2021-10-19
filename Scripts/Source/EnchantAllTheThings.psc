@@ -279,18 +279,49 @@ function ViewMagicEffect(string enchantmentType, string magicEffectName, string 
     int back = 6
     int mainMenu = 7
     int result = EnchantThings_Menu_ViewMagicEffect.Show()
+    
     if result == rename
         string newName = ViewMagicEffect_Rename(enchantmentType, magicEffectName, enchantmentName)
         ViewMagicEffect(enchantmentType, newName, enchantmentName)
+        
     elseIf result == setMagnitude
+        float magnitude = EnchantAllTheThings_MagicEffect.GetMagnitude(enchantmentType, magicEffectName, enchantmentName)
+        float newMagnitude = GetUserInput(magnitude) as float
+        if newMagnitude
+            EnchantAllTheThings_MagicEffect.SetMagnitude(enchantmentType, magicEffectName, newMagnitude, enchantmentName)
+            Debug.MessageBox("Set magnitude of " + magicEffectName + " to " + newMagnitude)
+        endIf
+        ViewMagicEffect(enchantmentType, magicEffectName, enchantmentName)
 
     elseIf result == setDuration
+        int duration = EnchantAllTheThings_MagicEffect.GetDuration(enchantmentType, magicEffectName, enchantmentName)
+        int newDuration = GetUserInput(duration) as int
+        if newDuration
+            EnchantAllTheThings_MagicEffect.SetDuration(enchantmentType, magicEffectName, newDuration, enchantmentName)
+            Debug.MessageBox("Set duration of " + magicEffectName + " to " + newDuration)
+        endIf
+        ViewMagicEffect(enchantmentType, magicEffectName, enchantmentName)
 
     elseIf result == setAreaOfEffect
+        int areaOfEffect = EnchantAllTheThings_MagicEffect.GetAreaOfEffect(enchantmentType, magicEffectName, enchantmentName)
+        int newAreaOfEffect = GetUserInput(areaOfEffect) as int
+        if newAreaOfEffect
+            EnchantAllTheThings_MagicEffect.SetAreaOfEffect(enchantmentType, magicEffectName, newAreaOfEffect, enchantmentName)
+            Debug.MessageBox("Set areaOfEffect of " + magicEffectName + " to " + newAreaOfEffect)
+        endIf
+        ViewMagicEffect(enchantmentType, magicEffectName, enchantmentName)
 
     elseIf result == setCost
+        int baseCost = EnchantAllTheThings_MagicEffect.GetBaseCost(enchantmentType, magicEffectName, enchantmentName)
+        int newBaseCost = GetUserInput(baseCost) as int
+        if newBaseCost
+            EnchantAllTheThings_MagicEffect.SetBaseCost(enchantmentType, magicEffectName, newBaseCost, enchantmentName)
+            Debug.MessageBox("Set baseCost of " + magicEffectName + " to " + newBaseCost)
+        endIf
+        ViewMagicEffect(enchantmentType, magicEffectName, enchantmentName)
 
     elseIf result == delete
+        Debug.MessageBox("TODO")
 
     elseIf result == back
         if enchantmentName
@@ -298,6 +329,7 @@ function ViewMagicEffect(string enchantmentType, string magicEffectName, string 
         else
             ManageMagicEffects()
         endIf
+
     elseIf result == mainMenu
         MainMenu()
     endIf

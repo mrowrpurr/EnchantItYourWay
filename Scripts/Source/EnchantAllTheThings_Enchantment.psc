@@ -6,6 +6,7 @@ int function Create(string enchantmentType, string name) global
     int theEnchantment = JMap.object()
     JMap.setObj(enchantmentsForType, name, theEnchantment)
     JMap.setObj(theEnchantment, "magicEffects", JMap.object())
+    Save()
 endFunction
 
 function SetName(string enchantmentType, string enchantmentName, string name) global
