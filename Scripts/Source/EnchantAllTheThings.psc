@@ -99,15 +99,14 @@ function ManageEnchantments()
     if result == createNew
         CreateNewEnchantment()
     elseIf result == viewEnchantment
-        string enchantmentType = 
-        string theEnchantment = ChooseEnchantment()
-        if theEnchantment_Search
-            string enchamentType = ChooseEnchantmentType()
-            string enchantmentName = ChooseEnchantment()
-            ViewEnchantment(enchantmentType, enchantmentName)
-        else
-            ManageEnchantments()
-        endIf
+        string enchantmentName = ChooseEnchantment(ChooseEnchantmentType())
+        ; if theEnchantment_Search
+        ;     string enchamentType = ChooseEnchantmentType()
+        ;     string enchantmentName = ChooseEnchantment()
+        ;     ViewEnchantment(enchantmentType, enchantmentName)
+        ; else
+        ;     ManageEnchantments()
+        ; endIf
     elseIf result == mainMenu
         MainMenu()
     endIf
@@ -319,7 +318,7 @@ function ManageMagicEffects()
     endIf
 endFunction
 
-function ViewMagicEffect(string enchantmentType, string magicEffectName, int theEnchantment = 0)
+function ViewMagicEffect(string enchantmentType, string magicEffectName)
     SetMessageBoxText("Magic Effect: " + magicEffectName)
     int rename = 0
     int setMagnitude = 1
@@ -332,7 +331,7 @@ function ViewMagicEffect(string enchantmentType, string magicEffectName, int the
     int result = EnchantThings_Menu_ViewMagicEffect.Show()
     if result == rename
         string newName = ViewMagicEffect_Rename(enchantmentType, magicEffectName)
-        ViewMagicEffect(enchantmentType, newName, theEnchantment)
+        ViewMagicEffect(enchantmentType, newName)
     elseIf result == setMagnitude
 
     elseIf result == setDuration
@@ -344,11 +343,11 @@ function ViewMagicEffect(string enchantmentType, string magicEffectName, int the
     elseIf result == delete
 
     elseIf result == back
-        if theEnchantment
-            ViewEnchantment(theEnchantment)
-        else
-            ManageMagicEffects()
-        endIf
+        ; if theEnchantment
+        ;     ; ViewEnchantment(enchantmentType, enchantmentName)
+        ; else
+        ;     ManageMagicEffects()
+        ; endIf
     elseIf result == mainMenu
         MainMenu()
     endIf
@@ -399,7 +398,7 @@ Form function ChooseItem(string enchantmentType = "", int theEnchantment = 0)
         MainMenu()
     elseIf result == back
         if theEnchantment
-            ViewEnchantment(theEnchantment)
+            ; ViewEnchantment(enchantmentType, enchantmentName)
         else
             MainMenu()
         endIf
