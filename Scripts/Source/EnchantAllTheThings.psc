@@ -31,8 +31,6 @@ endFunction
 
 ; Mod Installation
 event OnInit()
-    Debug.MessageBox("Installation")
-
     CurrentlyInstalledVersion = GetCurrentVersion()
     Spell theSpell = Game.GetFormFromFile(0x802, "EnchantAllTheThings.esp") as Spell
     PlayerRef.EquipSpell(theSpell, 0)
@@ -299,17 +297,62 @@ function ManageMagicEffects()
     elseIf result == rename
     elseIf result == viewMagicEffect
         string enchantmentType = ChooseEnchantmentType()
-        int theMagicEffect = ChooseMagicEffect(enchantmentType)
+        string magicEffectName = ChooseMagicEffect(enchantmentType)
+        ViewMagicEffect(enchantmentType, magicEffectName)
     elseIf result == mainMenu
         MainMenu()
     endIf
 endFunction
 
-int function ChooseMagicEffect(string enchantmentType)
+function ViewMagicEffect(string enchantmentType, string magicEffectName, int theEnchantment = 0)
+    SetMessageBoxText("Magic Effect: " + magicEffectName)
+    int rename = 0
+    int setMagnitude = 1
+    int setDuration = 2
+    int setAreaOfEffect = 3
+    int setCost = 4
+    int delete = 5
+    int back = 6
+    int mainMenu = 7
+    int result = EnchantThings_Menu_ViewMagicEffect.Show()
+    if result == rename
+        string newName = ViewMagicEffect_Rename(enchantmentType, magicEffectName)
+        ViewMagicEffect(enchantmentType, newName, theEnchantment)
+    elseIf result == setMagnitude
+
+    elseIf result == setDuration
+
+    elseIf result == setAreaOfEffect
+
+    elseIf result == setCost
+
+    elseIf result == delete
+
+    elseIf result == back
+        if theEnchantment
+            ViewEnchantment(theEnchantment)
+        else
+            ManageMagicEffects()
+        endIf
+    elseIf result == mainMenu
+        MainMenu()
+    endIf
+endFunction
+
+string function ViewMagicEffect_Rename(string enchantmentType, string magicEffectName)
+    bool uniqueName
+    string newName
+    while ! uniqueName
+        newName = GetUserInput(magicEffectName)
+        uniqueName = ! EnchantAllTheThings_MagicEffect.MagicEffectExists(enchantmentType, newName)
+    endWhile
+    EnchantAllTheThings_MagicEffect.SetName(enchantmentType, magicEffectName, newName)
+    return newName
+endFunction
+
+string function ChooseMagicEffect(string enchantmentType)
     string[] magicEffectNames = EnchantAllTheThings_MagicEffect.GetAllMagicEffectNames(enchantmentType)
-    Debug.MessageBox(magicEffectNames)
-    string magicEffectName = GetUserSelection(magicEffectNames)
-    Debug.MessageBox("Effect: " + magicEffectName)
+    return GetUserSelection(magicEffectNames)
 endFunction
 
 int function ChooseMagicEffectFromEnchantment(int theEnchantment)

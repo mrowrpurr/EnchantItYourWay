@@ -1,5 +1,5 @@
 {
-    "Weapon Enchantments": {
+    "Weapon": {
         "Fus Ro Dah": {
             "Effect": "__formData|EnchantAllTheThings_BonusEffects.esp|0xd62"
         },
@@ -31,7 +31,7 @@
             "Effect": "__formData|Skyrim.esm|0x4605c"
         }
     },
-    "Armor Enchantments": {
+    "Armor": {
         "Fortify Archery": {
             "Effect": "__formData|Skyrim.esm|0x7a0fe"
         },
