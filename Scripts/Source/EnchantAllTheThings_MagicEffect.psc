@@ -56,19 +56,6 @@ function SetDuration(string enchantmentType, string magicEffectName, int duratio
     endIf
 endFunction
 
-int function GetBaseCost(string enchantmentType, string magicEffectName, string enchantmentName = "") global
-    return JMap.getInt(_getMagicEffect(enchantmentType, magicEffectName, enchantmentName), "BaseCost")
-endFunction
-
-function SetBaseCost(string enchantmentType, string magicEffectName, int baseCost, string enchantmentName = "") global
-    JMap.setInt(_getMagicEffect(enchantmentType, magicEffectName, enchantmentName), "BaseCost", baseCost)
-    if enchantmentName
-        EnchantAllTheThings_Enchantment.Save()
-    else
-        Save()
-    endIf
-endFunction
-
 bool function MagicEffectExists(string enchantmentType, string magicEffectName, string enchantmentName = "") global
     int magicEffectsForType = _getMagicEffectsMap(enchantmentType, enchantmentName)
     return JMap.hasKey(magicEffectsForType, magicEffectName)

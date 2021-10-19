@@ -202,41 +202,35 @@ function EnchantItem(string enchantmentType, string enchantmentName)
     Weapon theWeapon = weaponOrArmor as Weapon
     Armor  theArmor  = weaponOrArmor as Armor
 
+    int existingItemCount = PlayerRef.GetItemCount(weaponOrArmor)
+    if existingItemCount
+        PlayerRef.RemoveItem(weaponOrArmor, existingItemCount, abSilent = true)
+    endIf
+
     int handSlot
     int slotMask
 
     if theWeapon
         slotMask = 0
         handSlot = 1
-        ; EquipSlot bothHands = Game.GetForm(0x13F45) as EquipSlot ; TODO map this via Creation Kit
-        ; EquipSlot equipType = theWeapon.GetEquipType()
-        ; if equipType == bothHands
-        ;     handSlot = 0
-        ; else
-        ;     handSlot = 1
-        ; endIf
+        theWeapon.SetEnchantmentValue(1)
     else
         handSlot = 0
         slotMask = theArmor.GetSlotMask()
     endIf
 
-    PlayerRef.AddItem(weaponOrArmor)
-    PlayerRef.EquipItem(weaponOrArmor)
+    PlayerRef.AddItem(weaponOrArmor, abSilent = true)
+    PlayerRef.EquipItem(weaponOrArmor, abSilent = true)
 
-    ; float         maxCharge        = EnchantAllTheThings_Enchantment.GetMagicEffectMaxCharge(theEnchantment)
+    Utility.Wait(0.2)
 
-    float maxCharge = 1
+    ; TODO set via UI
+    float maxCharge = 1000
 
     MagicEffect[] theEffects       = EnchantAllTheThings_Enchantment.GetMagicEffects(enchantmentType, enchantmentName)
     float[]       theMagnitudes    = EnchantAllTheThings_Enchantment.GetMagicEffectMagnitudes(enchantmentType, enchantmentName)
     int[]         theAreaOfEffects = EnchantAllTheThings_Enchantment.GetMagicEffectAreaOfEffects(enchantmentType, enchantmentName)
     int[]         theDurations     = EnchantAllTheThings_Enchantment.GetMagicEffectDurations(enchantmentType, enchantmentName)
-
-    ; Debug.MessageBox(maxCharge)
-    ; Debug.MessageBox(theEffects)
-    ; Debug.MessageBox(theMagnitudes)
-    ; Debug.MessageBox(theAreaOfEffects)
-    ; Debug.MessageBox(theDurations)
 
     WornObject.CreateEnchantment( \
         PlayerRef, \
@@ -248,6 +242,10 @@ function EnchantItem(string enchantmentType, string enchantmentName)
         theAreaOfEffects, \
         theDurations \
     )
+
+    if existingItemCount
+        PlayerRef.AddItem(weaponOrArmor, existingItemCount, abSilent = true)
+    endIf
 
     Debug.MessageBox("Enchanted " + weaponOrArmor.GetName() + " with " + enchantmentName)
 endFunction
@@ -282,10 +280,9 @@ function ViewMagicEffect(string enchantmentType, string magicEffectName, string 
     int setMagnitude = 1
     int setDuration = 2
     int setAreaOfEffect = 3
-    int setCost = 4
-    int delete = 5
-    int back = 6
-    int mainMenu = 7
+    int delete = 4
+    int back = 5
+    int mainMenu = 6
     int result = EnchantThings_Menu_ViewMagicEffect.Show()
 
     if result == rename
@@ -316,15 +313,6 @@ function ViewMagicEffect(string enchantmentType, string magicEffectName, string 
         if newAreaOfEffect
             EnchantAllTheThings_MagicEffect.SetAreaOfEffect(enchantmentType, magicEffectName, newAreaOfEffect, enchantmentName)
             Debug.MessageBox("Set areaOfEffect of " + magicEffectName + " to " + newAreaOfEffect)
-        endIf
-        ViewMagicEffect(enchantmentType, magicEffectName, enchantmentName)
-
-    elseIf result == setCost
-        int baseCost = EnchantAllTheThings_MagicEffect.GetBaseCost(enchantmentType, magicEffectName, enchantmentName)
-        int newBaseCost = GetUserInput(baseCost) as int
-        if newBaseCost
-            EnchantAllTheThings_MagicEffect.SetBaseCost(enchantmentType, magicEffectName, newBaseCost, enchantmentName)
-            Debug.MessageBox("Set baseCost of " + magicEffectName + " to " + newBaseCost)
         endIf
         ViewMagicEffect(enchantmentType, magicEffectName, enchantmentName)
 
