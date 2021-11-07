@@ -20,6 +20,11 @@ Message property EnchantThings_Menu_SetName auto
 
 Form property EnchantThings_MessageText_BaseForm auto
 
+ObjectReference property ItemsContainer auto
+
+bool property CurrentlyChoosingItemFromInventory auto
+Form property CurrentlySelectedItemFromInventory auto
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Versioning
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -76,9 +81,10 @@ function MainMenu()
     int magicEffectsLibrary = 2
     int result = EnchantThings_Menu_Main.Show()
     if result == enchantItem
-        ChooseItem(ChooseEnchantmentType())
+        string enchantmentType = ChooseEnchantmentType()
+        Form theItem = ChooseItem(enchantmentType)
         ; Now do something....
-        Debug.MessageBox("TODO")
+        Debug.MessageBox("TODO - actually enchant this item: " + theItem.GetName())
     elseIf result == enchantmentsLibrary
         ManageEnchantments()
     elseIf result == magicEffectsLibrary
@@ -266,11 +272,7 @@ string function ViewEnchanment_Rename(string enchantmentType, string enchantment
 endFunction
 
 function EnchantItem(string enchantmentType, string enchantmentName)
-    Debug.MessageBox("Enchant Item")
-
     Form weaponOrArmor = ChooseItem(enchantmentType, enchantmentName)
-
-    Debug.MessageBox("EnchantItem(" + weaponOrArmor + " : " + weaponOrArmor.GetName() + ")")
 
     Weapon theWeapon = weaponOrArmor as Weapon
     Armor  theArmor  = weaponOrArmor as Armor
@@ -430,7 +432,6 @@ string function ChooseMagicEffect(string enchantmentType, string enchantmentName
 endFunction
 
 Form function ChooseItem(string enchantmentType, string enchantmentName = "")
-    Debug.MessageBox("Choose Item")
     if ! enchantmentType
         enchantmentType = ChooseEnchantmentType()
     endIf
@@ -530,7 +531,36 @@ Form function SearchInventory(string enchantmentType)
 endFunction
 
 Form function ChooseFromInventory(string enchantmentType)
-    Debug.MessageBox("TODO")
+    ItemsContainer.RemoveAllItems()
+    int itemCount = PlayerRef.GetNumItems()
+    int i = 0
+    while i < itemCount
+        Form theForm = PlayerRef.GetNthForm(i)
+        if (enchantmentType == "WEAPON" && theForm as Weapon) || \
+           (enchantmentType == "ARMOR"  && theForm as Armor)
+            ; TODO - what to do if it's an ObjectReference, e.g. quest item
+            ItemsContainer.AddItem(theForm)
+        endIf
+        i += 1
+    endWhile
+
+    CurrentlyChoosingItemFromInventory = true
+    ListenForContainerMenu()
+
+    ; This opens the container view (NON-BLOCKING)
+    ItemsContainer.Activate(PlayerRef)
+
+    ; Block and WAIT for either:
+    ; (a) An item to be selected
+    ; (b) The inventory chooser to be closed
+    while CurrentlyChoosingItemFromInventory
+        Utility.WaitMenuMode(0.5)
+    endWhile
+
+    Form theForm = CurrentlySelectedItemFromInventory
+    CurrentlySelectedItemFromInventory = None
+    CurrentlyChoosingItemFromInventory = false
+    return theForm
 endFunction
 
 string function ChooseEnchantmentType()
@@ -613,3 +643,17 @@ string function GetUserSelection(string[] options, bool showFilter = true, strin
         endIf
     endIf
 endFunction
+
+function ListenForContainerMenu()
+    RegisterForMenu("ContainerMenu")
+endFunction
+
+function StopListeningForContainerMenu()
+    UnregisterForMenu("ContainerMenu")
+endFunction
+
+event OnMenuClose(string menuName)
+    if menuName == "ContainerMenu"
+        CurrentlyChoosingItemFromInventory = false
+    endIf
+endEvent
