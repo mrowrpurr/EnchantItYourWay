@@ -77,6 +77,8 @@ function MainMenu()
     int result = EnchantThings_Menu_Main.Show()
     if result == enchantItem
         ChooseItem(ChooseEnchantmentType())
+        ; Now do something....
+        Debug.MessageBox("TODO")
     elseIf result == enchantmentsLibrary
         ManageEnchantments()
     elseIf result == magicEffectsLibrary
@@ -188,9 +190,9 @@ function ViewEnchantment_AddMagicEffect_Search(string enchantmentType, string en
         return
     endIf
 
-    int searchResults = Search.ExecuteSearch(query, "MGEF")
+    int searchResults = ConsoleSearch.ExecuteSearch(query, "MGEF")
     JValue.retain(searchResults)
-    int effectCount = Search.GetResultCategoryCount(searchResults, "MGEF")
+    int effectCount = ConsoleSearch.GetResultRecordTypeCount(searchResults, "MGEF")
 
     int effectDisplayNames = JArray.object()
     JValue.retain(effectDisplayNames)
@@ -200,9 +202,9 @@ function ViewEnchantment_AddMagicEffect_Search(string enchantmentType, string en
 
     int i = 0
     while i < effectCount
-        int effectResult = Search.GetNthResultInCategory(searchResults, "MGEF", i)
-        string effectName = Search.GetResultName(effectResult)
-        string formId = Search.GetResultFormID(effectResult)
+        int effectResult = ConsoleSearch.GetNthResultOfRecordType(searchResults, "MGEF", i)
+        string effectName = ConsoleSearch.GetRecordName(effectResult)
+        string formId = ConsoleSearch.GetRecordFormID(effectResult)
         MagicEffect theEffect = FormHelper.HexToForm(formId) as MagicEffect
 
         if theEffect
@@ -226,10 +228,14 @@ function ViewEnchantment_AddMagicEffect_Search(string enchantmentType, string en
 
     string effectNameText = GetUserSelection(JArray.asStringArray(effectDisplayNames))
     int resultIndex = JMap.getInt(effectDisplayNameIndexes, effectNameText)
-    int effectResult = Search.GetNthResultInCategory(searchResults, "MGEF", resultIndex)
-    string formId = Search.GetResultFormID(effectResult)
+    int effectResult = ConsoleSearch.GetNthResultOfRecordType(searchResults, "MGEF", resultIndex)
+    string formId = ConsoleSearch.GetRecordFormID(effectResult)
     MagicEffect theEffect = FormHelper.HexToForm(formId) as MagicEffect
     int magicEffectObject = EnchantAllTheThings_MagicEffect.Create(enchantmentType, theEffect)
+
+    
+
+    ; EnchantAllTheThings_Enchantment.AddMagicEffect()
 
         ; TODO
 
@@ -260,7 +266,11 @@ string function ViewEnchanment_Rename(string enchantmentType, string enchantment
 endFunction
 
 function EnchantItem(string enchantmentType, string enchantmentName)
+    Debug.MessageBox("Enchant Item")
+
     Form weaponOrArmor = ChooseItem(enchantmentType, enchantmentName)
+
+    Debug.MessageBox("EnchantItem(" + weaponOrArmor + " : " + weaponOrArmor.GetName() + ")")
 
     Weapon theWeapon = weaponOrArmor as Weapon
     Armor  theArmor  = weaponOrArmor as Armor
@@ -314,6 +324,8 @@ function EnchantItem(string enchantmentType, string enchantmentName)
     string name = GetUserInput(weaponOrArmor.GetName() + " of " + enchantmentName)
     WornObject.SetDisplayName(PlayerRef, handSlot, slotMask, name, force = true) 
     Debug.MessageBox("Enchanted " + name)
+
+    Debug.MessageBox(FormHelper.FormToHex(WornObject.GetEnchantment(PlayerRef, handSlot, slotMask)))
 endFunction
 
 string function ChooseEnchantment(string enchantmentType)
@@ -417,11 +429,8 @@ string function ChooseMagicEffect(string enchantmentType, string enchantmentName
     return GetUserSelection(magicEffectNames)
 endFunction
 
-int function ChooseMagicEffectFromEnchantment(int theEnchantment)
-    Debug.MessageBox("TODO")    
-endFunction
-
 Form function ChooseItem(string enchantmentType, string enchantmentName = "")
+    Debug.MessageBox("Choose Item")
     if ! enchantmentType
         enchantmentType = ChooseEnchantmentType()
     endIf
@@ -455,7 +464,7 @@ Form function SearchAll(string enchantmentType, bool showItemsWithEnchantments =
     ShowRecurringNotificatonMessage("Searching...")
 
     string category = SearchCategoryForEnchantmentType(enchantmentType)
-    int searchResults = Search.ExecuteSearch(query, category)
+    int searchResults = ConsoleSearch.ExecuteSearch(query, category)
     JValue.retain(searchResults)
 
     int itemDisplayNames = JArray.object()
@@ -464,12 +473,12 @@ Form function SearchAll(string enchantmentType, bool showItemsWithEnchantments =
     int itemDisplayNamesToIndex = JMap.object()
     JValue.retain(itemDisplayNamesToIndex)
 
-    int categoryResultsCount = Search.GetResultCategoryCount(searchResults, category)
+    int categoryResultsCount = ConsoleSearch.GetResultRecordTypeCount(searchResults, category)
     int i = 0
     while i < categoryResultsCount
-        int itemResult = Search.GetNthResultInCategory(searchResults, category, i)
-        string name = Search.GetResultName(itemResult)
-        string formId = Search.GetResultFormID(itemResult)
+        int itemResult = ConsoleSearch.GetNthResultOfRecordType(searchResults, category, i)
+        string name = ConsoleSearch.GetRecordName(itemResult)
+        string formId = ConsoleSearch.GetRecordFormID(itemResult)
         string displayName = name + " (" + formId + ")"
         if showItemsWithEnchantments
             JArray.addStr(itemDisplayNames, displayName)
@@ -486,8 +495,8 @@ Form function SearchAll(string enchantmentType, bool showItemsWithEnchantments =
 
     string itemDisplayText = GetUserSelection(JArray.asStringArray(itemDisplayNames))
     int resultIndex = JMap.getInt(itemDisplayNamesToIndex, itemDisplayText)
-    int itemResult = Search.GetNthResultInCategory(searchResults, category, resultIndex)
-    string formId = Search.GetResultFormID(itemResult)
+    int itemResult = ConsoleSearch.GetNthResultOfRecordType(searchResults, category, resultIndex)
+    string formId = ConsoleSearch.GetRecordFormID(itemResult)
 
     JValue.release(searchResults)
     JValue.release(itemDisplayNames)
