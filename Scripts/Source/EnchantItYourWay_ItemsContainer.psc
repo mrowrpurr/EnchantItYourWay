@@ -1,6 +1,6 @@
-scriptName EnchantThings_ItemsContainer extends ObjectReference  
+scriptName EnchantItYourWay_ItemsContainer extends ObjectReference  
 
-EnchantAllTheThings property ModQuestScript auto
+EnchantItYourWay property ModQuestScript auto
 
 event OnItemRemoved(Form item, int count, ObjectReference akItemReference, ObjectReference akDestContainer)
     if ModQuestScript.CurrentlyChoosingItemFromInventory

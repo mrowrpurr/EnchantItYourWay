@@ -1,4 +1,4 @@
-scriptName EnchantAllTheThings_MagicEffect
+scriptName EnchantItYourWay_MagicEffect
 {Represents the 'Enchant All The Things' version of a magic effect}
 
 int function Create(string enchantmentType, string magicEffectName, MagicEffect theMagicEffect) global
@@ -15,7 +15,7 @@ function SetName(string enchantmentType, string magicEffectName, string name, st
     JMap.setObj(magicEffectsForType, name, currentObject)
     JMap.removeKey(magicEffectsForType, magicEffectName)
     if enchantmentName
-        EnchantAllTheThings_Enchantment.Save()
+        EnchantItYourWay_Enchantment.Save()
     else
         Save()
     endIf
@@ -28,7 +28,7 @@ endFunction
 function SetMagnitude(string enchantmentType, string magicEffectName, float magnitude, string enchantmentName = "") global
     JMap.setFlt(_getMagicEffect(enchantmentType, magicEffectName, enchantmentName), "Magnitude", magnitude)
     if enchantmentName
-        EnchantAllTheThings_Enchantment.Save()
+        EnchantItYourWay_Enchantment.Save()
     else
         Save()
     endIf
@@ -41,7 +41,7 @@ endFunction
 function SetAreaOfEffect(string enchantmentType, string magicEffectName, int areaOfEffect, string enchantmentName = "") global
     JMap.setInt(_getMagicEffect(enchantmentType, magicEffectName, enchantmentName), "AreaOfEffect", areaOfEffect)
     if enchantmentName
-        EnchantAllTheThings_Enchantment.Save()
+        EnchantItYourWay_Enchantment.Save()
     else
         Save()
     endIf
@@ -54,7 +54,7 @@ endFunction
 function SetDuration(string enchantmentType, string magicEffectName, int duration, string enchantmentName = "") global
     JMap.setInt(_getMagicEffect(enchantmentType, magicEffectName, enchantmentName), "Duration", duration)
     if enchantmentName
-        EnchantAllTheThings_Enchantment.Save()
+        EnchantItYourWay_Enchantment.Save()
     else
         Save()
     endIf
@@ -70,15 +70,15 @@ string[] function GetAllMagicEffectNames(string enchantmentType, string enchantm
 endFunction
 
 function Save() global
-    string filename = "Data/EnchantAllTheThings/MagicEffects.json"
+    string filename = "Data/EnchantItYourWay/MagicEffects.json"
     JValue.writeToFile(_getAllMagicEffectsMap(), filename)
 endFunction
 
 function LoadFromFile() global
-    string filename = "Data/EnchantAllTheThings/MagicEffects.json"
+    string filename = "Data/EnchantItYourWay/MagicEffects.json"
     int fileData = JValue.readFromFile(filename)
     if fileData
-        JDB.solveObjSetter(".enchantAllTheThings.magicEffects", fileData, createMissingKeys = true)
+        JDB.solveObjSetter(".enchantItYourWay.magicEffects", fileData, createMissingKeys = true)
     endIf
 endFunction
 
@@ -86,7 +86,7 @@ endFunction
 
 int function _getMagicEffect(string enchantmentType, string magicEffectName, string enchantmentName = "") global
     if enchantmentName
-        return EnchantAllTheThings_Enchantment._getMagicEffect(enchantmentType, enchantmentName, magicEffectName)
+        return EnchantItYourWay_Enchantment._getMagicEffect(enchantmentType, enchantmentName, magicEffectName)
     else
         return JMap.getObj(_getMagicEffectsMap(enchantmentType), magicEffectName)
     endIf
@@ -94,17 +94,17 @@ endFunction
 
 int function _getMagicEffectsMap(string enchantmentType, string enchantmentName = "") global
     if enchantmentName
-        return EnchantAllTheThings_Enchantment._getMagicEffectsMap(enchantmentType, enchantmentName)
+        return EnchantItYourWay_Enchantment._getMagicEffectsMap(enchantmentType, enchantmentName)
     else
         return JMap.getObj(_getAllMagicEffectsMap(), enchantmentType)
     endIf
 endFunction
 
 int function _getAllMagicEffectsMap() global
-    int magicEffectsMap = JDB.solveObj(".enchantAllTheThings.magicEffects")
+    int magicEffectsMap = JDB.solveObj(".enchantItYourWay.magicEffects")
     if ! magicEffectsMap
         magicEffectsMap = JMap.object()
-        JDB.solveObjSetter(".enchantAllTheThings.magicEffects", magicEffectsMap, createMissingKeys = true)
+        JDB.solveObjSetter(".enchantItYourWay.magicEffects", magicEffectsMap, createMissingKeys = true)
         JMap.setObj(magicEffectsMap, "Weapon", JMap.object())
         JMap.setObj(magicEffectsMap, "Armor", JMap.object())
     endIf

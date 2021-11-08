@@ -1,4 +1,4 @@
-scriptName EnchantAllTheThings_Enchantment
+scriptName EnchantItYourWay_Enchantment
 {Represents the 'Enchant All The Things' version of an enchantment}
 
 int function Create(string enchantmentType, string name) global
@@ -56,7 +56,7 @@ MagicEffect[] function GetMagicEffects(string enchantmentType, string enchantmen
     elseIf magicEffectCount == 6
         magicEffects = new MagicEffect[6]
     else
-        Debug.MessageBox("No support yet for more than 6 magic effects")
+        Debug.MessageBox("No support yet for more than 6 magic effects") ; TODO
         return magicEffects
     endIf
     ; Fill the array
@@ -114,7 +114,7 @@ endFunction
 
 function AddMagicEffect(string enchantmentType, string enchantmentName, string magicEffectName) global
     int magicEffectsMap = _getMagicEffectsMap(enchantmentType, enchantmentName)
-    int baseMagicEffect = EnchantAllTheThings_MagicEffect._getMagicEffect(enchantmentType, magicEffectName)
+    int baseMagicEffect = EnchantItYourWay_MagicEffect._getMagicEffect(enchantmentType, magicEffectName)
     int enchantmentMagicEffect = JValue.shallowCopy(baseMagicEffect)
     JMap.setObj(magicEffectsMap, magicEffectName, enchantmentMagicEffect)
     Save()
@@ -127,15 +127,15 @@ function RemoveMagicEffect(string enchantmentType, string enchantmentName, strin
 endFunction
 
 function Save() global
-    string filename = "Data/EnchantAllTheThings/Enchantments.json"
+    string filename = "Data/EnchantItYourWay/Enchantments.json"
     JValue.writeToFile(_getAllEnchantmentsMap(), filename)
 endFunction
 
 function LoadFromFile() global
-    string filename = "Data/EnchantAllTheThings/Enchantments.json"
+    string filename = "Data/EnchantItYourWay/Enchantments.json"
     int fileData = JValue.readFromFile(filename)
     if fileData
-        JDB.solveObjSetter(".enchantAllTheThings.enchantments", fileData, createMissingKeys = true)
+        JDB.solveObjSetter(".enchantItYourWay.enchantments", fileData, createMissingKeys = true)
     endIf
 endFunction
 
@@ -159,10 +159,10 @@ int function _getEnchantmentsMapForType(string enchantmentType) global
 endFunction
 
 int function _getAllEnchantmentsMap() global
-    int enchantmentsMap = JDB.solveObj(".enchantAllTheThings.enchantments")
+    int enchantmentsMap = JDB.solveObj(".enchantItYourWay.enchantments")
     if ! enchantmentsMap
         enchantmentsMap = JMap.object()
-        JDB.solveObjSetter(".enchantAllTheThings.enchantments", enchantmentsMap, createMissingKeys = true)
+        JDB.solveObjSetter(".enchantItYourWay.enchantments", enchantmentsMap, createMissingKeys = true)
         JMap.setObj(enchantmentsMap, "Weapon", JMap.object())
         JMap.setObj(enchantmentsMap, "Armor", JMap.object())
     endIf

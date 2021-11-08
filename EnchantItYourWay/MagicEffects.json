@@ -7,7 +7,7 @@
       "Effect": "__formData|Skyrim.esm|0x493aa"
     },
     "Invisibility": {
-      "Effect": "__formData|EnchantAllTheThings_BonusEffects.esp|0x800"
+      "Effect": "__formData|EnchantItYourWay_BonusEffects.esp|0x800"
     }
   },
   "Weapon": {
@@ -28,7 +28,7 @@
       "Effect": "__formData|Skyrim.esm|0x4605b"
     },
     "Fus Ro Dah": {
-      "Effect": "__formData|EnchantAllTheThings_BonusEffects.esp|0xd62"
+      "Effect": "__formData|EnchantItYourWay_BonusEffects.esp|0xd62"
     },
     "Lingering Fire Damage": {
       "effect": "__formData|Skyrim.esm|0xfbfec"
