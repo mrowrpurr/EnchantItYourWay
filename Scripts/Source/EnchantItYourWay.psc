@@ -114,6 +114,15 @@ function ManageEnchantments()
         else
             ManageEnchantments()
         endIf
+    elseIf result == remove
+        string enchantmentType = CurrentlySelectedItemEnchantementType
+        if ! enchantmentType
+            enchantmentType = ChooseEnchantmentType()
+        endIf
+        string enchantmentName = ChooseEnchantment(enchantmentType)
+        EnchantItYourWay_Enchantment.Delete(enchantmentType, enchantmentName)
+        Debug.MessageBox("Deleted enchantment " + enchantmentName)
+        ManageEnchantments()
     elseIf result == mainMenu
         MainMenu()
     endIf
@@ -550,8 +559,8 @@ Form function ChooseItemFromInventory(string enchantmentType = "")
     return theForm
 endFunction
 
-string function ChooseEnchantmentType()
-    SetMessageBoxText("Choose either Armor or Weapons to enchant", header = "")
+string function ChooseEnchantmentType(string text = "Choose enchantment item type: Armor or Weapons")
+    SetMessageBoxText(text, header = "")
     int armorType = 0
     int weaponType = 1
     int result = EnchantItYourWay_Menu_ChooseEnchantmentType.Show()

@@ -1,11 +1,17 @@
 scriptName EnchantItYourWay_Enchantment
 {Represents the 'Enchant All The Things' version of an enchantment}
 
-int function Create(string enchantmentType, string name) global
+int function Create(string enchantmentType, string enchantmentName) global
     int enchantmentsForType = _getEnchantmentsMapForType(enchantmentType)
     int theEnchantment = JMap.object()
-    JMap.setObj(enchantmentsForType, name, theEnchantment)
+    JMap.setObj(enchantmentsForType, enchantmentName, theEnchantment)
     JMap.setObj(theEnchantment, "magicEffects", JMap.object())
+    Save()
+endFunction
+
+function Delete(string enchantmentType, string enchantmentName) global
+    int enchantmentsForType = _getEnchantmentsMapForType(enchantmentType)
+    JMap.removeKey(enchantmentsForType, enchantmentName)
     Save()
 endFunction
 
