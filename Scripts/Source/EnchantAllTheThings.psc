@@ -15,7 +15,6 @@ Message property EnchantThings_Menu_ChooseEnchantmentType auto
 Message property EnchantThings_Menu_ManageMagicEffectsLibrary auto
 Message property EnchantThings_Menu_ViewMagicEffect auto
 
-Message property EnchantThings_Menu_ChooseItem auto
 Message property EnchantThings_Menu_SetName auto
 
 Form property EnchantThings_MessageText_BaseForm auto
@@ -24,6 +23,7 @@ ObjectReference property ItemsContainer auto
 
 bool property CurrentlyChoosingItemFromInventory auto
 Form property CurrentlySelectedItemFromInventory auto
+string property CurrentlySelectedItemEnchantementType auto
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Versioning
@@ -71,6 +71,10 @@ function StopRecurringNotificationMessage()
 endFunction
 
 function MainMenu()
+    CurrentlySelectedItemEnchantementType = ""
+    CurrentlySelectedItemFromInventory = None
+    CurrentlyChoosingItemFromInventory = false
+
     ; TESTING
     EnchantAllTheThings_Enchantment.LoadFromFile()
     EnchantAllTheThings_MagicEffect.LoadFromFile()
@@ -81,10 +85,8 @@ function MainMenu()
     int magicEffectsLibrary = 2
     int result = EnchantThings_Menu_Main.Show()
     if result == enchantItem
-        string enchantmentType = ChooseEnchantmentType()
-        Form theItem = ChooseItem(enchantmentType)
-        ; Now do something....
-        Debug.MessageBox("TODO - actually enchant this item: " + theItem.GetName())
+        Form theItem = ChooseItemFromInventory()
+        ManageEnchantments()
     elseIf result == enchantmentsLibrary
         ManageEnchantments()
     elseIf result == magicEffectsLibrary
@@ -103,7 +105,10 @@ function ManageEnchantments()
     if result == createNew
         CreateNewEnchantment()
     elseIf result == viewEnchantment
-        string enchantmentType = ChooseEnchantmentType()
+        string enchantmentType = CurrentlySelectedItemEnchantementType
+        if ! enchantmentType
+            ChooseEnchantmentType()
+        endIf
         string enchantmentName = ChooseEnchantment(enchantmentType)
         ViewEnchantment(enchantmentType, enchantmentName)
     elseIf result == mainMenu
@@ -272,7 +277,10 @@ string function ViewEnchanment_Rename(string enchantmentType, string enchantment
 endFunction
 
 function EnchantItem(string enchantmentType, string enchantmentName)
-    Form weaponOrArmor = ChooseItem(enchantmentType, enchantmentName)
+    Form weaponOrArmor = CurrentlySelectedItemFromInventory
+    if ! weaponOrArmor
+        weaponOrArmor = ChooseItemFromInventory(enchantmentType)
+    endIf
 
     Weapon theWeapon = weaponOrArmor as Weapon
     Armor  theArmor  = weaponOrArmor as Armor
@@ -431,82 +439,6 @@ string function ChooseMagicEffect(string enchantmentType, string enchantmentName
     return GetUserSelection(magicEffectNames)
 endFunction
 
-Form function ChooseItem(string enchantmentType, string enchantmentName = "")
-    if ! enchantmentType
-        enchantmentType = ChooseEnchantmentType()
-    endIf
-    SetMessageBoxText()
-    int searchAll = 0
-    int searchInventory = 1
-    int listInventory = 2
-    int mainMenu = 3
-    int back = 4
-    int result = EnchantThings_Menu_ChooseItem.Show()
-    if result == searchAll
-        return SearchAll(enchantmentType)
-    elseIf result == searchInventory
-        return SearchInventory(enchantmentType)
-    elseIf result == listInventory
-        return ChooseFromInventory(enchantmentType)
-    elseIf result == mainMenu
-        MainMenu()
-    elseIf result == back
-        if enchantmentName
-            ViewEnchantment(enchantmentType, enchantmentName)
-        else
-            MainMenu()
-        endIf
-    endIf
-endFunction
-
-Form function SearchAll(string enchantmentType, bool showItemsWithEnchantments = false)
-    string query = GetUserInput()
-
-    ShowRecurringNotificatonMessage("Searching...")
-
-    string category = SearchCategoryForEnchantmentType(enchantmentType)
-    int searchResults = ConsoleSearch.ExecuteSearch(query, category)
-    JValue.retain(searchResults)
-
-    int itemDisplayNames = JArray.object()
-    JValue.retain(itemDisplayNames)
-
-    int itemDisplayNamesToIndex = JMap.object()
-    JValue.retain(itemDisplayNamesToIndex)
-
-    int categoryResultsCount = ConsoleSearch.GetResultRecordTypeCount(searchResults, category)
-    int i = 0
-    while i < categoryResultsCount
-        int itemResult = ConsoleSearch.GetNthResultOfRecordType(searchResults, category, i)
-        string name = ConsoleSearch.GetRecordName(itemResult)
-        string formId = ConsoleSearch.GetRecordFormID(itemResult)
-        string displayName = name + " (" + formId + ")"
-        if showItemsWithEnchantments
-            JArray.addStr(itemDisplayNames, displayName)
-            JMap.setInt(itemDisplayNamesToIndex, displayName, i)
-        else
-            Form theItem = FormHelper.HexToForm(formId)
-            if ! IsEnchanted(theItem)
-                JArray.addStr(itemDisplayNames, displayName)
-                JMap.setInt(itemDisplayNamesToIndex, displayName, i)
-            endIf
-        endIf
-        i += 1
-    endWhile
-
-    string itemDisplayText = GetUserSelection(JArray.asStringArray(itemDisplayNames))
-    int resultIndex = JMap.getInt(itemDisplayNamesToIndex, itemDisplayText)
-    int itemResult = ConsoleSearch.GetNthResultOfRecordType(searchResults, category, resultIndex)
-    string formId = ConsoleSearch.GetRecordFormID(itemResult)
-
-    JValue.release(searchResults)
-    JValue.release(itemDisplayNames)
-    JValue.release(itemDisplayNamesToIndex)
-    StopRecurringNotificationMessage()
-
-    return FormHelper.HexToForm(formId)
-endFunction
-
 bool function IsEnchanted(Form item)
     Enchantment theEnchantment
     Weapon theWeapon = item as Weapon
@@ -530,14 +462,15 @@ Form function SearchInventory(string enchantmentType)
     Debug.MessageBox("TODO")
 endFunction
 
-Form function ChooseFromInventory(string enchantmentType)
+Form function ChooseItemFromInventory(string enchantmentType = "")
     ItemsContainer.RemoveAllItems()
     int itemCount = PlayerRef.GetNumItems()
     int i = 0
     while i < itemCount
-        Form theForm = PlayerRef.GetNthForm(i)
-        if (enchantmentType == "WEAPON" && theForm as Weapon) || \
-           (enchantmentType == "ARMOR"  && theForm as Armor)
+        Form theForm     = PlayerRef.GetNthForm(i)
+        Weapon theWeapon = theForm as Weapon
+        Armor  theArmor  = theForm as Armor
+        if (! enchantmentType && (theWeapon || theArmor)) || (enchantmentType == "WEAPON" && theWeapon) || (enchantmentType == "ARMOR" && theArmor)
             ; TODO - what to do if it's an ObjectReference, e.g. quest item
             ItemsContainer.AddItem(theForm)
         endIf
@@ -557,9 +490,14 @@ Form function ChooseFromInventory(string enchantmentType)
         Utility.WaitMenuMode(0.5)
     endWhile
 
-    Form theForm = CurrentlySelectedItemFromInventory
-    CurrentlySelectedItemFromInventory = None
     CurrentlyChoosingItemFromInventory = false
+    Form theForm = CurrentlySelectedItemFromInventory
+    if theForm as Weapon
+        CurrentlySelectedItemEnchantementType = "WEAPON"
+    elseIf theForm as Armor
+        CurrentlySelectedItemEnchantementType = "ARMOR"
+    endIf
+
     return theForm
 endFunction
 
