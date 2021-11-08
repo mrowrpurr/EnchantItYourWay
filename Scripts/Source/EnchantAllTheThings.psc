@@ -11,15 +11,15 @@ Message property EnchantThings_Menu_Main auto
 Message property EnchantThings_Menu_ManageEnchantmentsLibrary auto
 Message property EnchantThings_Menu_ViewEnchantment auto
 Message property EnchantThings_Menu_ChooseEnchantmentType auto
-
 Message property EnchantThings_Menu_ManageMagicEffectsLibrary auto
 Message property EnchantThings_Menu_ViewMagicEffect auto
-
 Message property EnchantThings_Menu_SetName auto
 
 Form property EnchantThings_MessageText_BaseForm auto
 
 ObjectReference property ItemsContainer auto
+
+GlobalVariable property EnchantThings_EnchantmentHasAnyEffects auto
 
 bool property CurrentlyChoosingItemFromInventory auto
 Form property CurrentlySelectedItemFromInventory auto
@@ -107,10 +107,14 @@ function ManageEnchantments()
     elseIf result == viewEnchantment
         string enchantmentType = CurrentlySelectedItemEnchantementType
         if ! enchantmentType
-            ChooseEnchantmentType()
+            enchantmentType = ChooseEnchantmentType()
         endIf
         string enchantmentName = ChooseEnchantment(enchantmentType)
-        ViewEnchantment(enchantmentType, enchantmentName)
+        if enchantmentName
+            ViewEnchantment(enchantmentType, enchantmentName)
+        else
+            ManageEnchantments()
+        endIf
     elseIf result == mainMenu
         MainMenu()
     endIf
@@ -122,7 +126,11 @@ function ShowSetNamePrompt(string text)
 endFunction
 
 function CreateNewEnchantment()
-    string enchantmentType = ChooseEnchantmentType()
+    string enchantmentType = CurrentlySelectedItemEnchantementType
+    if ! enchantmentType
+        enchantmentType = ChooseEnchantmentType()
+    endIf
+
     ShowSetNamePrompt("Set a name for your new enchantment")
 
     bool uniqueName
@@ -140,6 +148,10 @@ function CreateNewEnchantment()
     ViewEnchantment(enchantmentType, enchantmentName)
 endFunction
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; View Enchantment
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 function ViewEnchantment(string enchantmentType, string enchantmentName)
     string text = "Enchantment Type: " + enchantmentType + \
         "\nEnchantment Name: " + enchantmentName
@@ -154,6 +166,12 @@ function ViewEnchantment(string enchantmentType, string enchantmentName)
         endWhile
     endIf
     SetMessageBoxText(text)
+
+    if EnchantAllTheThings_Enchantment.HasAnyMagicEffects(enchantmentType, enchantmentName)
+        EnchantThings_EnchantmentHasAnyEffects.Value = 1
+    else
+        EnchantThings_EnchantmentHasAnyEffects.Value = 0
+    endIf
 
     int enchantItem = 0
     int rename = 1
@@ -171,7 +189,11 @@ function ViewEnchantment(string enchantmentType, string enchantmentName)
         ViewEnchantment(enchantmentType, enchantmentName)
     elseIf result == viewMagicEffect
         string magicEffectName = ChooseMagicEffect(enchantmentType, enchantmentName)
-        ViewMagicEffect(enchantmentType, magicEffectName, enchantmentName)
+        if magicEffectName
+            ViewMagicEffect(enchantmentType, magicEffectName, enchantmentName)
+        else
+            ViewEnchantment(enchantmentType, enchantmentName)
+        endIf
     elseIf result == mainMenu
         MainMenu()
     endIf
@@ -276,6 +298,10 @@ string function ViewEnchanment_Rename(string enchantmentType, string enchantment
     return newName
 endFunction
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 function EnchantItem(string enchantmentType, string enchantmentName)
     Form weaponOrArmor = CurrentlySelectedItemFromInventory
     if ! weaponOrArmor
@@ -354,9 +380,16 @@ function ManageMagicEffects()
     elseIf result == remove
     elseIf result == rename
     elseIf result == viewMagicEffect
-        string enchantmentType = ChooseEnchantmentType()
+        string enchantmentType = CurrentlySelectedItemEnchantementType
+        if ! enchantmentType
+            enchantmentType = ChooseEnchantmentType()
+        endIf
         string magicEffectName = ChooseMagicEffect(enchantmentType)
-        ViewMagicEffect(enchantmentType, magicEffectName)
+        if magicEffectName
+            ViewMagicEffect(enchantmentType, magicEffectName)
+        else
+            ManageMagicEffects()
+        endIf
     elseIf result == mainMenu
         MainMenu()
     endIf
@@ -470,7 +503,7 @@ Form function ChooseItemFromInventory(string enchantmentType = "")
         Form theForm     = PlayerRef.GetNthForm(i)
         Weapon theWeapon = theForm as Weapon
         Armor  theArmor  = theForm as Armor
-        if (! enchantmentType && (theWeapon || theArmor)) || (enchantmentType == "WEAPON" && theWeapon) || (enchantmentType == "ARMOR" && theArmor)
+        if ((! enchantmentType) && (theWeapon || theArmor)) || (enchantmentType == "WEAPON" && theWeapon) || (enchantmentType == "ARMOR" && theArmor)
             ; TODO - what to do if it's an ObjectReference, e.g. quest item
             ItemsContainer.AddItem(theForm)
         endIf
