@@ -30,6 +30,12 @@
     "Fus Ro Dah": {
       "Effect": "__formData|EnchantAllTheThings_BonusEffects.esp|0xd62"
     },
+    "Lingering Fire Damage": {
+      "effect": "__formData|Skyrim.esm|0xfbfec"
+    },
+    "Lingering Steam Damage": {
+      "effect": "__formData|Dawnguard.esm|0x1533a"
+    },
     "Magicka Damage": {
       "Effect": "__formData|Skyrim.esm|0x5b44f"
     },

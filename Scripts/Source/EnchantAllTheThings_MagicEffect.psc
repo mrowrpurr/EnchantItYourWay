@@ -1,8 +1,12 @@
 scriptName EnchantAllTheThings_MagicEffect
 {Represents the 'Enchant All The Things' version of a magic effect}
 
-int function Create(string enchantmentType, MagicEffect theMagicEffect) global
-    Debug.MessageBox("TODO")
+int function Create(string enchantmentType, string magicEffectName, MagicEffect theMagicEffect) global
+    int effectsMap = _getMagicEffectsMap(enchantmentType)
+    int theEffect  = JMap.object()
+    JMap.setForm(theEffect, "Effect", theMagicEffect)
+    JMap.setObj(effectsMap, magicEffectName, theEffect)
+    Save()
 endFunction
 
 function SetName(string enchantmentType, string magicEffectName, string name, string enchantmentName = "") global

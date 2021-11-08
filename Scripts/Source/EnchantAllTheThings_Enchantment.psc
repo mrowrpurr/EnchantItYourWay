@@ -120,6 +120,12 @@ function AddMagicEffect(string enchantmentType, string enchantmentName, string m
     Save()
 endFunction
 
+function RemoveMagicEffect(string enchantmentType, string enchantmentName, string magicEffectName) global
+    int magicEffectsMap = _getMagicEffectsMap(enchantmentType, enchantmentName)
+    JMap.removeKey(magicEffectsMap, magicEffectName)
+    Save()
+endFunction
+
 function Save() global
     string filename = "Data/EnchantAllTheThings/Enchantments.json"
     JValue.writeToFile(_getAllEnchantmentsMap(), filename)

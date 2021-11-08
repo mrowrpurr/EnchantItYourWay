@@ -7,7 +7,6 @@ scriptName EnchantAllTheThings extends Quest
 Actor property PlayerRef auto
 
 Message property EnchantThings_Menu_Main auto
-
 Message property EnchantThings_Menu_ManageEnchantmentsLibrary auto
 Message property EnchantThings_Menu_ViewEnchantment auto
 Message property EnchantThings_Menu_ChooseEnchantmentType auto
@@ -138,19 +137,16 @@ function CreateNewEnchantment()
     while ! uniqueName
         enchantmentName = GetUserInput()
         if enchantmentName
-            uniqueName = ! EnchantAllTheThings_MagicEffect.MagicEffectExists(enchantmentType, enchantmentName)
+            uniqueName = ! EnchantAllTheThings_Enchantment.EnchantmentExists(enchantmentType, enchantmentName)
         else
             ManageEnchantments()
+            return
         endIf
     endWhile
 
     EnchantAllTheThings_Enchantment.Create(enchantmentType, enchantmentName)
     ViewEnchantment(enchantmentType, enchantmentName)
 endFunction
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; View Enchantment
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 function ViewEnchantment(string enchantmentType, string enchantmentName)
     string text = "Enchantment Type: " + enchantmentType + \
@@ -260,27 +256,37 @@ function ViewEnchantment_AddMagicEffect_Search(string enchantmentType, string en
     endWhile
 
     string effectNameText = GetUserSelection(JArray.asStringArray(effectDisplayNames))
-    int resultIndex = JMap.getInt(effectDisplayNameIndexes, effectNameText)
-    int effectResult = ConsoleSearch.GetNthResultOfRecordType(searchResults, "MGEF", resultIndex)
-    string formId = ConsoleSearch.GetRecordFormID(effectResult)
-    MagicEffect theEffect = FormHelper.HexToForm(formId) as MagicEffect
-    int magicEffectObject = EnchantAllTheThings_MagicEffect.Create(enchantmentType, theEffect)
 
-    
+    if effectNameText
+        int resultIndex = JMap.getInt(effectDisplayNameIndexes, effectNameText)
+        int effectResult = ConsoleSearch.GetNthResultOfRecordType(searchResults, "MGEF", resultIndex)
+        string formId = ConsoleSearch.GetRecordFormID(effectResult)
+        MagicEffect theEffect = FormHelper.HexToForm(formId) as MagicEffect
+        
+        ; Get a unique name for this magic effect
+        ShowSetNamePrompt("Set a name for this magic effect")
 
-    ; EnchantAllTheThings_Enchantment.AddMagicEffect()
+        string magicEffectName = theEffect.GetName()
+        bool uniqueName
+        while ! uniqueName
+            magicEffectName = GetUserInput(magicEffectName)
+            if magicEffectName
+                uniqueName = ! EnchantAllTheThings_MagicEffect.MagicEffectExists(enchantmentType, magicEffectName)
+            else
+                ViewEnchantment(enchantmentType, enchantmentName)
+                return
+            endIf
+        endWhile
 
-        ; TODO
+        int magicEffectObject = EnchantAllTheThings_MagicEffect.Create(enchantmentType, magicEffectName, theEffect)
+        EnchantAllTheThings_Enchantment.AddMagicEffect(enchantmentType, enchantmentName, magicEffectName)
+    endIf
 
-    ; EnchantAllTheThings_Enchantment.AddMagicEffect(theEnchantment, theEffect)
+    JValue.release(effectDisplayNames)
+    JValue.release(effectDisplayNameIndexes)
+    JValue.release(searchResults)
 
-    ; Debug.MessageBox("Added " + theEffect.GetName() + " " + formId + " to " + EnchantAllTheThings_Enchantment.GetName(theEnchantment))
-
-    ; JValue.release(effectDisplayNames)
-    ; JValue.release(effectDisplayNameIndexes)
-    ; JValue.release(searchResults)
-
-    ; ViewEnchantment(theEnchantment)
+    ViewEnchantment(enchantmentType, enchantmentName)
 endFunction
 
 string function ViewEnchanment_Rename(string enchantmentType, string enchantmentName)
@@ -297,10 +303,6 @@ string function ViewEnchanment_Rename(string enchantmentType, string enchantment
     EnchantAllTheThings_Enchantment.SetName(enchantmentType, enchantmentName, newName)
     return newName
 endFunction
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 function EnchantItem(string enchantmentType, string enchantmentName)
     Form weaponOrArmor = CurrentlySelectedItemFromInventory
@@ -438,7 +440,8 @@ function ViewMagicEffect(string enchantmentType, string magicEffectName, string 
         ViewMagicEffect(enchantmentType, magicEffectName, enchantmentName)
 
     elseIf result == delete
-        Debug.MessageBox("TODO")
+        EnchantAllTheThings_Enchantment.RemoveMagicEffect(enchantmentType, enchantmentName, magicEffectName)
+        ViewEnchantment(enchantmentType, enchantmentName)
 
     elseIf result == back
         if enchantmentName
