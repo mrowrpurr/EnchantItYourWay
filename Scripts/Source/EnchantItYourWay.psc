@@ -25,10 +25,6 @@ Form property EnchantItYourWay_MessageText_BaseForm auto
 ObjectReference property ItemsContainer auto
 
 GlobalVariable property EnchantItYourWay_EnchantmentHasAnyEffects auto
-GlobalVariable property EnchantItYourWay_EnableEquipItemPackage auto
-
-Package property EnchantYouWay_EquipItemPackage auto
-Scene property EnchantItYourWay_EquipItemScene auto
 
 bool property CurrentlyChoosingItemFromInventory auto
 Form property CurrentlySelectedItemFromInventory auto
@@ -407,6 +403,7 @@ function ManageMagicEffects()
     int mainMenu = 4
     int result = EnchantItYourWay_Menu_ManageMagicEffectsLibrary.Show()
     if result == add
+        
     elseIf result == remove
     elseIf result == rename
     elseIf result == viewMagicEffect
