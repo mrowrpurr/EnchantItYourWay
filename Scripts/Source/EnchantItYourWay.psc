@@ -4,6 +4,12 @@ scriptName EnchantItYourWay extends Quest
 
 ; When adding effects to an Enchantment, don't show the effects the enchantment already has
 
+;;;
+;;; 1: On RemoveItem, take the item AWAY from the player
+;;;
+;;; 2: When enchanting, SPAWN a new object...
+;;;
+
 Actor property PlayerRef auto
 
 Message property EnchantItYourWay_Menu_Main auto
@@ -19,6 +25,10 @@ Form property EnchantItYourWay_MessageText_BaseForm auto
 ObjectReference property ItemsContainer auto
 
 GlobalVariable property EnchantItYourWay_EnchantmentHasAnyEffects auto
+GlobalVariable property EnchantItYourWay_EnableEquipItemPackage auto
+
+Package property EnchantYouWay_EquipItemPackage auto
+Scene property EnchantItYourWay_EquipItemScene auto
 
 bool property CurrentlyChoosingItemFromInventory auto
 Form property CurrentlySelectedItemFromInventory auto
@@ -322,18 +332,31 @@ function EnchantItem(string enchantmentType, string enchantmentName)
     Weapon theWeapon = weaponOrArmor as Weapon
     Armor  theArmor  = weaponOrArmor as Armor
 
+    ItemsContainer.RemoveAllItems()
+
     int existingItemCount = PlayerRef.GetItemCount(weaponOrArmor)
     if existingItemCount
-        PlayerRef.RemoveItem(weaponOrArmor, existingItemCount, abSilent = true)
+        PlayerRef.RemoveItem(weaponOrArmor, existingItemCount, abSilent = true, akOtherContainer = ItemsContainer)
     endIf
 
     int handSlot
     int slotMask
+    
+    PlayerRef.AddItem(weaponOrArmor)
+    PlayerRef.EquipItem(weaponOrArmor)
 
+    ; Check Papyrus Extender TODO
     if theWeapon
         slotMask = 0
-        handSlot = 1
-        theWeapon.SetEnchantmentValue(1)
+        if PlayerRef.GetEquippedWeapon(abLeftHand = true)
+            handSlot = 0
+        elseIf PlayerRef.GetEquippedWeapon(abLeftHand = false)
+            handSlot = 1
+        else
+            Debug.MessageBox("Uh oh. Nothing got equipped! Object: " + weaponOrArmor) 
+            return
+        endIf
+        theWeapon.SetEnchantmentValue(1) ; ??? Needed ??? Only operates on the base form
         if PlayerRef.IsWeaponDrawn()
             PlayerRef.SheatheWeapon()
             Utility.Wait(1)
@@ -343,13 +366,7 @@ function EnchantItem(string enchantmentType, string enchantmentName)
         slotMask = theArmor.GetSlotMask()
     endIf
 
-    PlayerRef.AddItem(weaponOrArmor, abSilent = true)
-    PlayerRef.EquipItem(weaponOrArmor, abSilent = true)
-
-    Utility.Wait(0.2)
-
-    ; TODO set via UI
-    float maxCharge = 1000
+    float maxCharge = 1000 ; TODO set via UI
 
     MagicEffect[] theEffects       = EnchantItYourWay_Enchantment.GetMagicEffects(enchantmentType, enchantmentName)
     float[]       theMagnitudes    = EnchantItYourWay_Enchantment.GetMagicEffectMagnitudes(enchantmentType, enchantmentName)
@@ -367,19 +384,8 @@ function EnchantItem(string enchantmentType, string enchantmentName)
         theDurations \
     )
 
-    Debug.MessageBox("Create Enchantment " + \
-        PlayerRef + ", " + \
-        handSlot + ", " + \
-        slotMask + ", " + \
-        maxCharge + ", " + \
-        theEffects + ", " + \
-        theMagnitudes + ", " + \
-        theAreaOfEffects + ", " + \
-        theDurations + ", " \
-    )
-
     if existingItemCount
-        PlayerRef.AddItem(weaponOrArmor, existingItemCount, abSilent = true)
+        ItemsContainer.RemoveItem(weaponOrArmor, existingItemCount, abSilent = true, akOtherContainer = PlayerRef)
     endIf
 
     ShowSetNamePrompt("Set the name of your newly enchanted item")
@@ -497,6 +503,7 @@ string function ChooseMagicEffect(string enchantmentType, string enchantmentName
     return GetUserSelection(magicEffectNames)
 endFunction
 
+; TODO!
 bool function IsEnchanted(Form item)
     Enchantment theEnchantment
     Weapon theWeapon = item as Weapon
@@ -525,12 +532,14 @@ Form function ChooseItemFromInventory(string enchantmentType = "")
     int itemCount = PlayerRef.GetNumItems()
     int i = 0
     while i < itemCount
-        Form theForm     = PlayerRef.GetNthForm(i)
-        Weapon theWeapon = theForm as Weapon
-        Armor  theArmor  = theForm as Armor
-        if ((! enchantmentType) && (theWeapon || theArmor)) || (enchantmentType == "WEAPON" && theWeapon) || (enchantmentType == "ARMOR" && theArmor)
-            ; TODO - what to do if it's an ObjectReference, e.g. quest item
-            ItemsContainer.AddItem(theForm)
+        Form theForm = PlayerRef.GetNthForm(i)
+        if ! IsEnchanted(theForm)
+            Weapon theWeapon = theForm as Weapon
+            Armor  theArmor  = theForm as Armor
+            if ((! enchantmentType) && (theWeapon || theArmor)) || (enchantmentType == "WEAPON" && theWeapon) || (enchantmentType == "ARMOR" && theArmor)
+                ; TODO - what to do if it's an ObjectReference, e.g. quest item
+                ItemsContainer.AddItem(theForm)
+            endIf
         endIf
         i += 1
     endWhile

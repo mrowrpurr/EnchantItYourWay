@@ -30,6 +30,9 @@
     "Fus Ro Dah": {
       "Effect": "__formData|EnchantItYourWay_BonusEffects.esp|0xd62"
     },
+    "Ghost Extra Damage Effect": {
+      "effect": "__formData|Skyrim.esm|0xd205a"
+    },
     "Lingering Fire Damage": {
       "effect": "__formData|Skyrim.esm|0xfbfec"
     },
